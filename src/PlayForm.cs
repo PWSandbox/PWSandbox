@@ -41,11 +41,6 @@ public partial class PlayForm : Form
             Application.Exit();
             return;
         }
-
-        this.DoubleBuffered = true;
-
-        this.KeyPreview = true;
-        this.KeyDown += OnKeyDown;
     }
 
     private void OnKeyDown(object sender, KeyEventArgs e)

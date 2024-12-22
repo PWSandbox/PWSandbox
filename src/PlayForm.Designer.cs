@@ -19,10 +19,20 @@ partial class PlayForm
 
     private void InitializeComponent()
     {
-        this.components = new System.ComponentModel.Container();
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(800, 450);
-        this.Text = "PWSandbox (PLAY mode) [v1.0.0] [by yarb00] [https://github.com/yarb00/pwsandbox]";
+        SuspendLayout();
+        // 
+        // PlayForm
+        // 
+        AutoScaleDimensions = new SizeF(7F, 15F);
+        AutoScaleMode = AutoScaleMode.Font;
+        ClientSize = new Size(464, 321); // 480x360
+        DoubleBuffered = true;
+        KeyPreview = true;
+        Name = "PlayForm";
+        ShowIcon = false;
+        Text = "PWSandbox - PLAY mode";
+        KeyDown += OnKeyDown;
+        ResumeLayout(false);
     }
 
     #endregion
