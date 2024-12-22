@@ -11,7 +11,22 @@ public partial class MenuForm : Form
 
     private void LoadMap(object sender, EventArgs e)
     {
-        PlayForm playForm = new PlayForm(mapFileLocationTextBox.Text);
-        playForm.Show();
+        if (mapFileLocationTextBox.Text != "")
+        {
+            PlayForm playForm = new PlayForm(mapFileLocationTextBox.Text);
+            if (!playForm.IsDisposed) playForm.Show();
+        }
+        else
+        {
+            MessageBox.Show(
+                "ERROR loading PWSandbox:"
+                + "\nmap file location is NOT specified!",
+                "PWSandbox",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error,
+                MessageBoxDefaultButton.Button1
+            );
+            return;
+        }
     }
 }

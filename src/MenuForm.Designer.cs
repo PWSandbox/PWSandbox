@@ -59,7 +59,7 @@ partial class MenuForm
         appVersionLabel.Name = "appVersionLabel";
         appVersionLabel.Size = new Size(49, 14);
         appVersionLabel.TabIndex = 2;
-        appVersionLabel.Text = "v1.1.0";
+        appVersionLabel.Text = "v1.1.1";
         // 
         // authorLabel
         // 
@@ -90,7 +90,7 @@ partial class MenuForm
         loadMapFileButton.TabIndex = 5;
         loadMapFileButton.Text = "Load map!";
         loadMapFileButton.UseVisualStyleBackColor = true;
-		loadMapFileButton.Click += LoadMap;
+        loadMapFileButton.Click += LoadMap;
         // 
         // MenuForm
         // 
