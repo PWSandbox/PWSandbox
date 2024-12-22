@@ -90,6 +90,7 @@ partial class MenuForm
         loadMapFileButton.TabIndex = 5;
         loadMapFileButton.Text = "Load map!";
         loadMapFileButton.UseVisualStyleBackColor = true;
+		loadMapFileButton.Click += LoadMap;
         // 
         // MenuForm
         // 

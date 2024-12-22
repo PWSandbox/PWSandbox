@@ -8,4 +8,10 @@ public partial class MenuForm : Form
     {
         InitializeComponent();
     }
+
+    private void LoadMap(object sender, EventArgs e)
+    {
+        PlayForm playForm = new PlayForm(mapFileLocationTextBox.Text);
+        playForm.Show();
+    }
 }

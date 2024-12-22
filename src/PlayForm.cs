@@ -4,7 +4,6 @@ namespace PWSandbox;
 
 public partial class PlayForm : Form
 {
-    private const string mapFileLocation = "map.pwsandbox";
     private string[] mapLines;
 
     private bool isPlayerSpawned = false;
@@ -19,7 +18,7 @@ public partial class PlayForm : Form
         Wall = '@'
     }
 
-    public PlayForm()
+    public PlayForm(string mapFileLocation)
     {
         InitializeComponent();
 
@@ -38,7 +37,7 @@ public partial class PlayForm : Form
                 MessageBoxDefaultButton.Button1
             );
 
-            Application.Exit();
+            this.Close();
             return;
         }
     }
