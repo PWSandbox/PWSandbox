@@ -23,10 +23,11 @@ partial class PlayForm
         // 
         // PlayForm
         // 
-        AutoScaleDimensions = new SizeF(7F, 15F);
-        AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(464, 321); // 480x360
+        AutoScaleMode = AutoScaleMode.None;
+        ClientSize = new Size(464, 321);
         DoubleBuffered = true;
+        FormBorderStyle = FormBorderStyle.FixedSingle;
+        MaximizeBox = false;
         KeyPreview = true;
         Name = "PlayForm";
         ShowIcon = false;

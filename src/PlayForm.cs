@@ -41,6 +41,10 @@ public partial class PlayForm : Form
             Close();
             return;
         }
+
+        int maxX = 0;
+        for (int y = 0; y < mapLines.Length; y++) if (maxX < mapLines[y].Length) maxX = mapLines[y].Length;
+        ClientSize = new Size(maxX * cellSize, mapLines.Length * cellSize);
     }
 
     private void OnKeyDown(object sender, KeyEventArgs e)

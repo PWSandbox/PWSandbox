@@ -43,7 +43,7 @@ partial class MenuForm
         // 
         githubLinkLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         githubLinkLabel.AutoSize = true;
-        githubLinkLabel.Font = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
+        githubLinkLabel.Font = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
         githubLinkLabel.Location = new Point(256, 65);
         githubLinkLabel.Name = "githubLinkLabel";
         githubLinkLabel.Size = new Size(196, 14);
@@ -54,7 +54,7 @@ partial class MenuForm
         // appVersionLabel
         // 
         appVersionLabel.AutoSize = true;
-        appVersionLabel.Font = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
+        appVersionLabel.Font = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
         appVersionLabel.Location = new Point(12, 9);
         appVersionLabel.Name = "appVersionLabel";
         appVersionLabel.Size = new Size(49, 14);
@@ -64,7 +64,7 @@ partial class MenuForm
         // authorLabel
         // 
         authorLabel.AutoSize = true;
-        authorLabel.Font = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point, 204);
+        authorLabel.Font = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
         authorLabel.Location = new Point(12, 23);
         authorLabel.Name = "authorLabel";
         authorLabel.Size = new Size(70, 14);
@@ -94,9 +94,8 @@ partial class MenuForm
         // 
         // MenuForm
         // 
-        AutoScaleDimensions = new SizeF(7F, 14F);
-        AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(464, 321); // 480x360
+        AutoScaleMode = AutoScaleMode.None;
+        ClientSize = new Size(464, 321);
         Controls.Add(loadMapFileButton);
         Controls.Add(mapFileLocationTextBox);
         Controls.Add(authorLabel);
