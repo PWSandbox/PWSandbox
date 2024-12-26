@@ -59,7 +59,7 @@ partial class MenuForm
         appVersionLabel.Name = "appVersionLabel";
         appVersionLabel.Size = new Size(49, 14);
         appVersionLabel.TabIndex = 2;
-        appVersionLabel.Text = "v1.1.1";
+        appVersionLabel.Text = "v1.2.0";
         // 
         // authorLabel
         // 

@@ -9,6 +9,7 @@
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <VersionPrefix>1.2.0</VersionPrefix>
   </PropertyGroup>
 
 </Project>

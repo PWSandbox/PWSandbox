@@ -4,7 +4,7 @@ namespace PWSandbox;
 
 public partial class PlayForm : Form
 {
-    private string[] mapLines;
+    private readonly string[] mapLines;
 
     private bool isPlayerSpawned = false;
     private int playerX, playerY;
@@ -15,7 +15,8 @@ public partial class PlayForm : Form
     {
         Void = ' ',
         Player = '!',
-        Wall = '@'
+        Wall = '@',
+        Finish = '='
     }
 
     public PlayForm(string mapFileLocation)
@@ -26,7 +27,7 @@ public partial class PlayForm : Form
         {
             mapLines = File.ReadAllLines(mapFileLocation);
         }
-        catch (System.IO.FileNotFoundException)
+        catch (FileNotFoundException)
         {
             MessageBox.Show(
                 "ERROR loading PWSandbox:"
@@ -37,7 +38,7 @@ public partial class PlayForm : Form
                 MessageBoxDefaultButton.Button1
             );
 
-            this.Close();
+            Close();
             return;
         }
     }
@@ -67,10 +68,10 @@ public partial class PlayForm : Form
     {
         base.OnPaint(e);
 
-        DrawMap(e.Graphics);
+        ProcessMap(e.Graphics);
     }
 
-    private void DrawMap(Graphics graphics)
+    private void ProcessMap(Graphics graphics)
     {
         for (int y = 0; y < mapLines.Length; y++)
         {
@@ -94,6 +95,16 @@ public partial class PlayForm : Form
                         break;
                     case (char)MapObjects.Wall:
                         DrawCell(graphics, x, y, cellSize, Color.Black);
+                        break;
+                    case (char)MapObjects.Finish:
+                        if (playerX == x && playerY == y) MessageBox.Show(
+                            "You reached the finish!",
+                            "PWSandbox - PLAY mode",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information,
+                            MessageBoxDefaultButton.Button1
+                        );
+                        DrawCell(graphics, x, y, cellSize, Color.Green);
                         break;
                 }
             }
