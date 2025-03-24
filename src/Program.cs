@@ -24,6 +24,9 @@
  * SOFTWARE.
  */
 
+using System;
+using System.Windows.Forms;
+
 namespace PWSandbox;
 
 static class Program
