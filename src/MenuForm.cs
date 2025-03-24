@@ -24,6 +24,12 @@
  * SOFTWARE.
  */
 
+using System;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
+
 namespace PWSandbox;
 
 public enum Theme

@@ -24,6 +24,9 @@
  * SOFTWARE.
  */
 
+using System.Drawing;
+using System.Windows.Forms;
+
 namespace PWSandbox;
 
 partial class MenuForm

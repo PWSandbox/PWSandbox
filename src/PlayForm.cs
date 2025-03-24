@@ -24,6 +24,11 @@
  * SOFTWARE.
  */
 
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
 namespace PWSandbox;
 
 public enum MapObject

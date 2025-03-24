@@ -24,6 +24,8 @@
  * SOFTWARE.
  */
 
+using System.Windows.Forms;
+
 namespace PWSandbox;
 
 public partial class AboutForm : Form
