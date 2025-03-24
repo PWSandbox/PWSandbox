@@ -26,66 +26,60 @@
 
 namespace PWSandbox;
 
+public enum MapObject
+{
+	Unknown = -1, Void,
+	Player,
+	Finish,
+	Wall, FakeWall, Barrier
+}
+
 public partial class PlayForm : Form
 {
-	private readonly string[] mapLines;
+	private readonly MapObject[,] mapObjects;
+
+	private (int x, int y) playerPosition;
+	private (int x, int y)? lastFinish = null;
 
 	private bool isPlayerSpawned = false;
-	private int playerX, playerY;
 
 	private const int cellSize = 20;
 
-	private enum MapObjects
+	private readonly Dictionary<MapObject, Color> ColorByMapObject = new()
 	{
-		Void = ' ',
-		Player = '!',
-		Wall = '@',
-		Finish = '='
-	}
+		{ MapObject.Unknown , Color.Magenta },
+		{ MapObject.Void, Color.Transparent },
+		{ MapObject.Player, Color.Yellow },
+		{ MapObject.Finish, Color.Green },
+		{ MapObject.Wall, Color.Black },
+		{ MapObject.FakeWall, Color.Black }, // Same color as Wall
+		{ MapObject.Barrier, Color.Transparent }, // Same color as Void
+	};
 
-	public PlayForm(string mapFileLocation)
+	public PlayForm(MapObject[,] mapObjects)
 	{
 		InitializeComponent();
 
-		try
-		{
-			mapLines = File.ReadAllLines(mapFileLocation);
-		}
-		catch (FileNotFoundException)
-		{
-			MessageBox.Show(
-				"ERROR loading PWSandbox:"
-				+ $"\n\"{mapFileLocation}\" file NOT found!",
-				"PWSandbox",
-				MessageBoxButtons.OK,
-				MessageBoxIcon.Error,
-				MessageBoxDefaultButton.Button1
-			);
+		this.mapObjects = mapObjects;
 
-			Close();
-			return;
-		}
-
-		int maxX = 0;
-		for (int y = 0; y < mapLines.Length; y++) if (maxX < mapLines[y].Length) maxX = mapLines[y].Length;
-		ClientSize = new Size(maxX * cellSize, mapLines.Length * cellSize);
+		ClientSize = new Size(mapObjects.GetLength(1) * cellSize, mapObjects.GetLength(0) * cellSize);
 	}
 
 	private void OnKeyDown(object sender, KeyEventArgs e)
 	{
 		switch (e.KeyCode)
 		{
-			case Keys.Up or Keys.W:
-				if (!IsCollision(playerX, playerY - 1)) playerY -= 1;
+			case Keys.W or Keys.Up:
+				if (!IsCollision((playerPosition.x, playerPosition.y - 1))) playerPosition.y -= 1;
 				break;
-			case Keys.Down or Keys.S:
-				if (!IsCollision(playerX, playerY + 1)) playerY += 1;
+			case Keys.S or Keys.Down:
+				if (!IsCollision((playerPosition.x, playerPosition.y + 1))) playerPosition.y += 1;
 				break;
-			case Keys.Left or Keys.A:
-				if (!IsCollision(playerX - 1, playerY)) playerX -= 1;
+			case Keys.A or Keys.Left:
+				if (!IsCollision((playerPosition.x - 1, playerPosition.y))) playerPosition.x -= 1;
 				break;
-			case Keys.Right or Keys.D:
-				if (!IsCollision(playerX + 1, playerY)) playerX += 1;
+			case Keys.D or Keys.Right:
+				if (!IsCollision((playerPosition.x + 1, playerPosition.y))) playerPosition.x += 1;
 				break;
 		}
 
@@ -101,52 +95,85 @@ public partial class PlayForm : Form
 
 	private void ProcessMap(Graphics graphics)
 	{
-		for (int y = 0; y < mapLines.Length; y++)
-		{
-			for (int x = 0; x < mapLines[y].Length; x++)
-			{
-				switch (mapLines[y][x])
+		for (int y = 0; y < mapObjects.GetLength(0); y++)
+			for (int x = 0; x < mapObjects.GetLength(1); x++)
+				switch (mapObjects[y, x])
 				{
-					default:
-					case (char)MapObjects.Void:
-						DrawCell(graphics, x, y, cellSize, Color.Transparent);
+					case MapObject.Void:
+						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Void]);
 						break;
-					case (char)MapObjects.Player:
+
+					case MapObject.Player:
 						if (!isPlayerSpawned)
 						{
-							playerX = x;
-							playerY = y;
+							playerPosition = (x, y);
 
 							isPlayerSpawned = true;
 						}
-						DrawCell(graphics, playerX, playerY, cellSize, Color.Yellow);
 						break;
-					case (char)MapObjects.Wall:
-						DrawCell(graphics, x, y, cellSize, Color.Black);
+
+					case MapObject.Finish:
+						if (playerPosition == (x, y) && lastFinish != (x, y))
+						{
+							MessageBox.Show(
+								"You have reached the finish!",
+								"PWSandbox [Play]",
+								MessageBoxButtons.OK,
+								MessageBoxIcon.Information,
+								MessageBoxDefaultButton.Button1
+							);
+
+							lastFinish = playerPosition;
+						}
+						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Finish]);
 						break;
-					case (char)MapObjects.Finish:
-						if (playerX == x && playerY == y) MessageBox.Show(
-							"You reached the finish!",
-							"PWSandbox - PLAY mode",
-							MessageBoxButtons.OK,
-							MessageBoxIcon.Information,
-							MessageBoxDefaultButton.Button1
-						);
-						DrawCell(graphics, x, y, cellSize, Color.Green);
+
+					case MapObject.Wall:
+						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Wall]);
+						break;
+
+					case MapObject.FakeWall:
+						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.FakeWall]);
+						break;
+
+					case MapObject.Barrier:
+						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Barrier]);
+						break;
+
+					case MapObject.Unknown:
+						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Unknown]);
 						break;
 				}
-			}
+
+		DrawCell(graphics, playerPosition, cellSize, ColorByMapObject[MapObject.Player]);
+	}
+
+	private static void DrawCell(Graphics graphics, (int x, int y) coordinates, int cellSize, Color color)
+	{
+		using Brush brush = new SolidBrush(color);
+
+		graphics.FillRectangle(
+			brush,
+			coordinates.x * cellSize, coordinates.y * cellSize,
+			cellSize, cellSize
+		);
+	}
+
+	private bool IsCollision((int x, int y) coordinates)
+	{
+		bool isCollision = false;
+
+		try
+		{
+			if (mapObjects[coordinates.y, coordinates.x] == MapObject.Wall
+			|| mapObjects[coordinates.y, coordinates.x] == MapObject.Barrier)
+				isCollision = true;
 		}
-	}
+		catch (IndexOutOfRangeException)
+		{
+			isCollision = true;
+		}
 
-	private void DrawCell(Graphics graphics, int x, int y, int cellSize, Color color)
-	{
-		using (Brush brush = new SolidBrush(color)) graphics.FillRectangle(brush, x * cellSize, y * cellSize, cellSize, cellSize);
-	}
-
-	private bool IsCollision(int x, int y)
-	{
-		if (mapLines[y][x] == (char)MapObjects.Wall) return true;
-		return false;
+		return isCollision;
 	}
 }

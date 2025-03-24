@@ -45,23 +45,132 @@ public partial class MenuForm : Form
 
 	private void LoadMapFile(object sender, EventArgs e)
 	{
-		if (mapFileLocationTextBox.Text != "")
+		string[] mapLines;
+
+		try
 		{
-			PlayForm playForm = new PlayForm(mapFileLocationTextBox.Text);
-			if (!playForm.IsDisposed) playForm.Show();
+			mapLines = File.ReadAllLines(mapFileLocationTextBox.Text);
 		}
-		else
+		catch (ArgumentException ex)
 		{
+			if (ex.ParamName != "path") throw;
+
 			MessageBox.Show(
-				"ERROR loading PWSandbox:"
-				+ "\nmap file location is NOT specified!",
+				"Please enter a valid path of the map file.",
 				"PWSandbox",
 				MessageBoxButtons.OK,
 				MessageBoxIcon.Error,
 				MessageBoxDefaultButton.Button1
 			);
+
 			return;
 		}
+		catch (FileNotFoundException)
+		{
+			MessageBox.Show(
+				$"File \"{mapFileLocationTextBox.Text}\" does not exist.",
+				"PWSandbox",
+				MessageBoxButtons.OK,
+				MessageBoxIcon.Error,
+				MessageBoxDefaultButton.Button1
+			);
+
+			return;
+		}
+
+		for (int y = 0; y < 3; y++)
+		{
+			mapLines = mapLines.Where(str => !string.IsNullOrWhiteSpace(str)).ToArray();
+
+			switch (y)
+			{
+				case 0:
+					if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.0;", true, null))
+					{
+						mapLines[0] = mapLines[0].TrimStart().Remove(0, "?PWSandbox-Map 1.0;".Length);
+						continue;
+					}
+					else
+					{
+						MessageBox.Show(
+							$"File \"{mapFileLocationTextBox.Text}\" is not a valid PWSandbox map or it is a map designed for a newer/older version of PWSandbox.",
+							"PWSandbox",
+							MessageBoxButtons.OK,
+							MessageBoxIcon.Error,
+							MessageBoxDefaultButton.Button1
+						);
+
+						return;
+					}
+
+				case 1:
+					if (mapLines[0].TrimStart().StartsWith("(map: begin)", true, null))
+					{
+						mapLines[0] = mapLines[0].TrimStart().Remove(0, "(map: begin)".Length);
+						continue;
+					}
+					else
+					{
+						MessageBox.Show(
+							$"An error occured while parsing map \"{mapFileLocationTextBox.Text}\": expected \"(map: begin)\" after map header (\"?PWSandbox-Map 1.0;\"), but it was not found.",
+							"PWSandbox",
+							MessageBoxButtons.OK,
+							MessageBoxIcon.Error,
+							MessageBoxDefaultButton.Button1
+						);
+
+						return;
+					}
+
+				case 2:
+					if (mapLines[^1].TrimEnd().EndsWith("(map: end)", true, null))
+					{
+						mapLines[^1] = mapLines[^1].TrimEnd().Remove(mapLines[^1].Length - "(map: end)".Length, "(map: end)".Length);
+						mapLines = mapLines.Where(str => !string.IsNullOrWhiteSpace(str)).ToArray();
+
+						break;
+					}
+					else
+					{
+						MessageBox.Show(
+							$"An error occured while parsing map \"{mapFileLocationTextBox.Text}\": expected \"(map: end)\" in the end of file, but it was not found.",
+							"PWSandbox",
+							MessageBoxButtons.OK,
+							MessageBoxIcon.Error,
+							MessageBoxDefaultButton.Button1
+						);
+
+						return;
+					}
+			}
+		}
+
+		int maxX = 0;
+		for (int y = 0; y < mapLines.Length; y++)
+			if (maxX < mapLines[y].Length)
+				maxX = mapLines[y].Length;
+
+		MapObject[,] mapObjects = new MapObject[mapLines.Length, maxX];
+
+		for (int y = 0; y < mapLines.Length; y++)
+		{
+			for (int x = 0; x < mapLines[y].Length; x++)
+			{
+				mapObjects[y, x] = mapLines[y][x] switch
+				{
+					' ' => MapObject.Void,
+					'!' => MapObject.Player,
+					'=' => MapObject.Finish,
+					'@' => MapObject.Wall,
+					'#' => MapObject.FakeWall,
+					'*' => MapObject.Barrier,
+					_ => MapObject.Unknown,
+				};
+			}
+		}
+
+		PlayForm playForm = new(mapObjects);
+		playForm.Show();
 	}
 
 	private void SwitchTheme(object sender, EventArgs e)
