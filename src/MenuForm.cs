@@ -1,5 +1,5 @@
 // This file is a part of PWSandbox ( https://github.com/yarb00/PWSandbox )
-// PWSandbox is licensed under the MIT (X11) License:
+// PWSandbox is licensed under the MIT (Expat) License:
 
 /* MIT License
  *

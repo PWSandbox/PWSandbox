@@ -1,5 +1,5 @@
 // This file is a part of PWSandbox ( https://github.com/yarb00/PWSandbox )
-// PWSandbox is licensed under the MIT (X11) License:
+// PWSandbox is licensed under the MIT (Expat) License:
 
 /* MIT License
  *
@@ -39,9 +39,9 @@ public partial class AboutForm : Form
 		appDescriptionTextBox.Text =
 @"Simple sandbox game, built with .NET and Windows Forms.
 
-You can find PWSandbox Git repository at https://github.com/yarb00/PWSandbox
+You can find the PWSandbox Git repository at https://github.com/yarb00/PWSandbox
 
-This software is licensed under the MIT (X11) License. You can find its text below.
+This software is licensed under the MIT (Expat) License. You can find its text below.
 
 =====
 
