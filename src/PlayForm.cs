@@ -43,50 +43,66 @@ public partial class PlayForm : Form
 {
 	private readonly MapObject[,] mapObjects;
 
-	private (int x, int y) playerPosition;
-	private (int x, int y)? lastFinish = null;
-
-	private bool isPlayerSpawned = false;
+	private (int x, int y)? playerPosition = null, lastFinish = null;
 
 	private const int cellSize = 20;
 
 	private readonly Dictionary<MapObject, Color> ColorByMapObject = new()
 	{
-		{ MapObject.Unknown , Color.Magenta },
-		{ MapObject.Void, Color.Transparent },
+		{ MapObject.Unknown, Color.Magenta },
+		{ MapObject.Void, Color.White },
 		{ MapObject.Player, Color.Yellow },
 		{ MapObject.Finish, Color.Green },
 		{ MapObject.Wall, Color.Black },
 		{ MapObject.FakeWall, Color.Black }, // Same color as Wall
-		{ MapObject.Barrier, Color.Transparent }, // Same color as Void
+		{ MapObject.Barrier, Color.White }, // Same color as Void
 	};
 
-	public PlayForm(MapObject[,] mapObjects)
+	public PlayForm(MapObject[,] mapObjects, Dictionary<MapObject, Color>? colorByMapObject = null)
 	{
 		InitializeComponent();
 
 		this.mapObjects = mapObjects;
 
 		ClientSize = new Size(mapObjects.GetLength(1) * cellSize, mapObjects.GetLength(0) * cellSize);
+
+		if (colorByMapObject is not null)
+			foreach (var color in colorByMapObject)
+				ColorByMapObject[color.Key] = color.Value;
 	}
 
 	private void OnKeyDown(object sender, KeyEventArgs e)
 	{
+		if (e.KeyCode == Keys.Escape) Close();
+
+		if (playerPosition is null ||
+			!new List<Keys>
+			{
+				Keys.W, Keys.Up,
+				Keys.S, Keys.Down,
+				Keys.A, Keys.Left,
+				Keys.D, Keys.Right
+			}.Contains(e.KeyCode)) return;
+
+		(int playerX, int playerY) = ((int, int))playerPosition;
+
 		switch (e.KeyCode)
 		{
 			case Keys.W or Keys.Up:
-				if (!IsCollision((playerPosition.x, playerPosition.y - 1))) playerPosition.y -= 1;
+				if (!IsCollision((playerX, playerY - 1))) playerY -= 1;
 				break;
 			case Keys.S or Keys.Down:
-				if (!IsCollision((playerPosition.x, playerPosition.y + 1))) playerPosition.y += 1;
+				if (!IsCollision((playerX, playerY + 1))) playerY += 1;
 				break;
 			case Keys.A or Keys.Left:
-				if (!IsCollision((playerPosition.x - 1, playerPosition.y))) playerPosition.x -= 1;
+				if (!IsCollision((playerX - 1, playerY))) playerX -= 1;
 				break;
 			case Keys.D or Keys.Right:
-				if (!IsCollision((playerPosition.x + 1, playerPosition.y))) playerPosition.x += 1;
+				if (!IsCollision((playerX + 1, playerY))) playerX += 1;
 				break;
 		}
+
+		playerPosition = (playerX, playerY);
 
 		Invalidate();
 	}
@@ -109,12 +125,7 @@ public partial class PlayForm : Form
 						break;
 
 					case MapObject.Player:
-						if (!isPlayerSpawned)
-						{
-							playerPosition = (x, y);
-
-							isPlayerSpawned = true;
-						}
+						playerPosition ??= (x, y);
 						break;
 
 					case MapObject.Finish:
@@ -150,7 +161,8 @@ public partial class PlayForm : Form
 						break;
 				}
 
-		DrawCell(graphics, playerPosition, cellSize, ColorByMapObject[MapObject.Player]);
+		if (playerPosition is null) return;
+		DrawCell(graphics, ((int x, int y))playerPosition, cellSize, ColorByMapObject[MapObject.Player]);
 	}
 
 	private static void DrawCell(Graphics graphics, (int x, int y) coordinates, int cellSize, Color color)

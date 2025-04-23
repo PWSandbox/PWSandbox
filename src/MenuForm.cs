@@ -25,6 +25,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -207,7 +208,18 @@ public partial class MenuForm : Form
 			return;
 		}
 
-		new PlayForm(mapObjects).Show();
+		Dictionary<MapObject, Color>? colors =
+			CurrentColorTheme == Theme.SimpleDark
+				? new()
+				{
+					{ MapObject.Void, Color.Black },
+					{ MapObject.Wall, Color.White },
+					{ MapObject.FakeWall, Color.White },
+					{ MapObject.Barrier, Color.Black }
+				}
+				: null;
+
+		new PlayForm(mapObjects, colors).Show();
 	}
 
 	#endregion
