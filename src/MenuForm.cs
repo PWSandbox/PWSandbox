@@ -256,4 +256,9 @@ public partial class MenuForm : Form
 	{
 		new AboutForm(this).ShowDialog();
 	}
+
+	private void CheckForUpdates(object sender, EventArgs e)
+	{
+		new UpdateCheckForm(this).ShowDialog();
+	}
 }

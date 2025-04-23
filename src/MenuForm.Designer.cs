@@ -104,6 +104,7 @@ partial class MenuForm
 		checkForUpdatesButton.TabIndex = 12;
 		checkForUpdatesButton.Text = "Check for updates";
 		checkForUpdatesButton.UseVisualStyleBackColor = false;
+		checkForUpdatesButton.Click += CheckForUpdates;
 		//
 		// mapOpenFileDialog
 		//
