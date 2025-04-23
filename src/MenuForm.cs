@@ -254,6 +254,6 @@ public partial class MenuForm : Form
 
 	private void OpenAboutAppDialog(object sender, EventArgs e)
 	{
-		new AboutForm().ShowDialog();
+		new AboutForm(this).ShowDialog();
 	}
 }

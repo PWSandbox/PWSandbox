@@ -24,28 +24,30 @@
  * SOFTWARE.
  */
 
+using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace PWSandbox;
 
 public partial class AboutForm : Form
 {
-	public AboutForm()
+	public AboutForm(MenuForm? menuForm = null)
 	{
 		InitializeComponent();
 
-		appVersionLabel.Text = $"v{System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(3)}";
+		if (menuForm?.appVersion is null) appVersionLabel.Text = "Missing version!";
+		else appVersionLabel.Text = $"v{menuForm.appVersion.ToString(3)}";
 
-		appDescriptionTextBox.Text =
+		appDescriptionRichTextBox.Text =
 @"Simple sandbox game, built with .NET and Windows Forms.
 
-You can find the PWSandbox Git repository at https://github.com/yarb00/PWSandbox
+You can find the PWSandbox Git repository at https://github.com/yarb00/PWSandbox.
 
-This software is licensed under the MIT (Expat) License. You can find its text below.
+This software is licensed under the MIT (Expat) License. You can find its text below.";
 
-=====
-
-MIT License
+		appLicenseRichTextBox.Text =
+@"MIT License
 
 Copyright (c) 2024-2025 yarb00
 
@@ -66,5 +68,39 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.";
+
+		SetTheme(menuForm?.CurrentColorTheme ?? Theme.SimpleDark);
+	}
+
+	private void OnLinkClick(object sender, LinkClickedEventArgs e)
+	{
+		System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(e.LinkText!) { UseShellExecute = true });
+	}
+
+	private void SetTheme(Theme colorTheme)
+	{
+		Color
+			backgroundColor = colorTheme switch
+			{
+				Theme.SimpleLight => Color.White,
+				Theme.SimpleDark => Color.Black,
+				_ => throw new NotImplementedException()
+			},
+			foregroundColor = colorTheme switch
+			{
+				Theme.SimpleLight => Color.Black,
+				Theme.SimpleDark => Color.White,
+				_ => throw new NotImplementedException()
+			};
+
+		BackColor =
+		appDescriptionRichTextBox.BackColor =
+		appLicenseRichTextBox.BackColor =
+		backgroundColor;
+
+		ForeColor =
+		appDescriptionRichTextBox.ForeColor =
+		appLicenseRichTextBox.ForeColor =
+		foregroundColor;
 	}
 }
