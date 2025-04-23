@@ -25,6 +25,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -34,54 +35,38 @@ namespace PWSandbox;
 
 public enum Theme
 {
-	Light,
-	Dark
+	SimpleDark,
+	SimpleLight
 }
 
 public partial class MenuForm : Form
 {
-	private Theme currentColorTheme = Theme.Dark;
+	public Theme CurrentColorTheme { get; private set; } = Theme.SimpleDark;
+	public readonly Version? appVersion = null;
 
 	public MenuForm()
 	{
 		InitializeComponent();
 
-		appVersionLabel.Text = $"v{System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(3)}";
+		appVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+
+		if (appVersion is null) appVersionLabel.Text = "Missing version!";
+		else appVersionLabel.Text = $"v{appVersion.ToString(3)}";
 	}
 
-	private void LoadMapFile(object sender, EventArgs e)
+	#region Map loading
+
+	public static MapObject[,] ParseMapFromFile(string filePath)
 	{
 		string[] mapLines;
 
 		try
 		{
-			mapLines = File.ReadAllLines(mapFileLocationTextBox.Text);
+			mapLines = File.ReadAllLines(filePath);
 		}
-		catch (ArgumentException ex)
+		catch (Exception)
 		{
-			if (ex.ParamName != "path") throw;
-
-			MessageBox.Show(
-				"Please enter a valid path of the map file.",
-				"PWSandbox",
-				MessageBoxButtons.OK,
-				MessageBoxIcon.Error,
-				MessageBoxDefaultButton.Button1
-			);
-
-			return;
-		}
-		catch (FileNotFoundException)
-		{
-			MessageBox.Show(
-				$"File \"{mapFileLocationTextBox.Text}\" does not exist.",
-				"PWSandbox",
-				MessageBoxButtons.OK,
-				MessageBoxIcon.Error,
-				MessageBoxDefaultButton.Button1
-			);
-
-			return;
+			throw;
 		}
 
 		for (int y = 0; y < 3; y++)
@@ -98,15 +83,7 @@ public partial class MenuForm : Form
 					}
 					else
 					{
-						MessageBox.Show(
-							$"File \"{mapFileLocationTextBox.Text}\" is not a valid PWSandbox map or it is a map designed for a newer/older version of PWSandbox.",
-							"PWSandbox",
-							MessageBoxButtons.OK,
-							MessageBoxIcon.Error,
-							MessageBoxDefaultButton.Button1
-						);
-
-						return;
+						throw new FormatException($"File \"{filePath}\" doesn't contain map header or version of standard in map header is unsupported");
 					}
 
 				case 1:
@@ -117,15 +94,7 @@ public partial class MenuForm : Form
 					}
 					else
 					{
-						MessageBox.Show(
-							$"An error occured while parsing map \"{mapFileLocationTextBox.Text}\": expected \"(map: begin)\" after map header (\"?PWSandbox-Map 1.0;\"), but it was not found.",
-							"PWSandbox",
-							MessageBoxButtons.OK,
-							MessageBoxIcon.Error,
-							MessageBoxDefaultButton.Button1
-						);
-
-						return;
+						throw new FormatException($"Expected \"(map: begin)\" block after map header (\"?PWSandbox-Map 1.0;\") in file \"{filePath}\", but it was not found");
 					}
 
 				case 2:
@@ -138,15 +107,7 @@ public partial class MenuForm : Form
 					}
 					else
 					{
-						MessageBox.Show(
-							$"An error occured while parsing map \"{mapFileLocationTextBox.Text}\": expected \"(map: end)\" in the end of file, but it was not found.",
-							"PWSandbox",
-							MessageBoxButtons.OK,
-							MessageBoxIcon.Error,
-							MessageBoxDefaultButton.Button1
-						);
-
-						return;
+						throw new FormatException($"Expected \"(map: end)\" block in the end of file \"{filePath}\", but it was not found");
 					}
 			}
 		}
@@ -159,9 +120,7 @@ public partial class MenuForm : Form
 		MapObject[,] mapObjects = new MapObject[mapLines.Length, maxX];
 
 		for (int y = 0; y < mapLines.Length; y++)
-		{
 			for (int x = 0; x < mapLines[y].Length; x++)
-			{
 				mapObjects[y, x] = mapLines[y][x] switch
 				{
 					' ' => MapObject.Void,
@@ -170,41 +129,131 @@ public partial class MenuForm : Form
 					'@' => MapObject.Wall,
 					'#' => MapObject.FakeWall,
 					'*' => MapObject.Barrier,
-					_ => MapObject.Unknown,
+					_ => MapObject.Unknown
 				};
-			}
+
+		return mapObjects;
+	}
+
+	private void LoadMapFile(object sender, EventArgs e)
+	{
+		MapObject[,] mapObjects;
+
+		if (mapOpenFileDialog.ShowDialog() == DialogResult.Cancel) return;
+
+		string mapFileLocation = mapOpenFileDialog.FileName;
+
+		try
+		{
+			mapObjects = ParseMapFromFile(mapFileLocation);
+		}
+		catch (FileNotFoundException)
+		{
+			MessageBox.Show(
+				$"File \"{mapFileLocation}\" does not exist.",
+				"PWSandbox",
+				MessageBoxButtons.OK,
+				MessageBoxIcon.Error,
+				MessageBoxDefaultButton.Button1
+			);
+
+			return;
+		}
+		catch (ArgumentException ex) when (ex.ParamName == "path")
+		{
+			MessageBox.Show(
+				"Please enter a valid path of the map file.",
+				"PWSandbox",
+				MessageBoxButtons.OK,
+				MessageBoxIcon.Error,
+				MessageBoxDefaultButton.Button1
+			);
+
+			return;
+		}
+		catch (FormatException ex) when (ex.Message.Contains("(map: end)", StringComparison.OrdinalIgnoreCase))
+		{
+			MessageBox.Show(
+				$"An error occured while parsing map \"{mapFileLocation}\": expected \"(map: end)\" in the end of file, but it was not found.",
+				"PWSandbox",
+				MessageBoxButtons.OK,
+				MessageBoxIcon.Error,
+				MessageBoxDefaultButton.Button1
+			);
+
+			return;
+		}
+		catch (FormatException ex) when (ex.Message.Contains("(map: begin)", StringComparison.OrdinalIgnoreCase))
+		{
+			MessageBox.Show(
+				$"An error occured while parsing map \"{mapFileLocation}\": expected \"(map: begin)\" after map header (\"?PWSandbox-Map 1.0;\"), but it was not found.",
+				"PWSandbox",
+				MessageBoxButtons.OK,
+				MessageBoxIcon.Error,
+				MessageBoxDefaultButton.Button1
+			);
+
+			return;
+		}
+		catch (FormatException ex) when (ex.Message.Contains("map header", StringComparison.OrdinalIgnoreCase))
+		{
+			MessageBox.Show(
+				$"File \"{mapFileLocation}\" is not a valid PWSandbox map or it is a map designed for a newer/older version of PWSandbox.",
+				"PWSandbox",
+				MessageBoxButtons.OK,
+				MessageBoxIcon.Error,
+				MessageBoxDefaultButton.Button1
+			);
+
+			return;
 		}
 
-		PlayForm playForm = new(mapObjects);
-		playForm.Show();
+		Dictionary<MapObject, Color>? colors =
+			CurrentColorTheme == Theme.SimpleDark
+				? new()
+				{
+					{ MapObject.Void, Color.Black },
+					{ MapObject.Wall, Color.White },
+					{ MapObject.FakeWall, Color.White },
+					{ MapObject.Barrier, Color.Black }
+				}
+				: null;
+
+		new PlayForm(mapObjects, colors).Show();
 	}
+
+	#endregion
 
 	private void SwitchTheme(object sender, EventArgs e)
 	{
-		Theme newTheme = currentColorTheme == Theme.Light ? Theme.Dark : Theme.Light;
+		CurrentColorTheme =
+			CurrentColorTheme == Theme.SimpleLight
+				? Theme.SimpleDark
+				: Theme.SimpleLight;
 
-		Color backColor = Color.Transparent, foreColor = Color.Transparent;
+		Color
+			backgroundColor = CurrentColorTheme switch
+			{
+				Theme.SimpleLight => Color.White,
+				Theme.SimpleDark => Color.Black,
+				_ => throw new NotImplementedException()
+			},
+			foregroundColor = CurrentColorTheme switch
+			{
+				Theme.SimpleLight => Color.Black,
+				Theme.SimpleDark => Color.White,
+				_ => throw new NotImplementedException()
+			};
 
-		if (newTheme == Theme.Light)
-		{
-			backColor = Color.White;
-			foreColor = Color.Black;
-		}
-		else if (newTheme == Theme.Dark)
-		{
-			backColor = Color.Black;
-			foreColor = Color.White;
-		}
+		BackColor =
+		backgroundColor;
 
-		currentColorTheme = newTheme;
-
-		BackColor = backColor;
-		ForeColor = foreColor;
+		ForeColor =
+		foregroundColor;
 	}
 
 	private void OpenAboutAppDialog(object sender, EventArgs e)
 	{
-		AboutForm aboutForm = new();
-		aboutForm.ShowDialog();
+		new AboutForm(this).ShowDialog();
 	}
 }

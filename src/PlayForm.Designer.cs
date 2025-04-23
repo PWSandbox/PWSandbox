@@ -24,9 +24,6 @@
  * SOFTWARE.
  */
 
-using System.Drawing;
-using System.Windows.Forms;
-
 namespace PWSandbox;
 
 partial class PlayForm
@@ -47,10 +44,12 @@ partial class PlayForm
 		//
 		// PlayForm
 		//
-		AutoScaleMode = AutoScaleMode.None;
-		ClientSize = new Size(464, 321);
+		AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+		BackColor = System.Drawing.Color.White;
+		ClientSize = new System.Drawing.Size(464, 321);
 		DoubleBuffered = true;
-		FormBorderStyle = FormBorderStyle.FixedSingle;
+		ForeColor = System.Drawing.Color.Black;
+		FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 		KeyPreview = true;
 		MaximizeBox = false;
 		Name = "PlayForm";
