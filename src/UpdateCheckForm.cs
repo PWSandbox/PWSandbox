@@ -76,7 +76,7 @@ public partial class UpdateCheckForm : Form
 		foregroundColor;
 	}
 
-	private async void OnFormLoad(object sender, EventArgs e)
+	private async void CheckForUpdates(object sender, EventArgs e)
 	{
 		if (currentVersion is null)
 		{
@@ -89,7 +89,7 @@ Current version of this PWSandbox executable is unknown (possibly corrupted), so
 		}
 
 		updateStatusLabel.Text = "Checking for updates...";
-		updateDetailsRichTextBox.Text = "Please wait...";
+		updateDetailsRichTextBox.Text = "Please wait... Fetching the latest data from the GitHub Releases API...";
 
 		bool isUpdateAvailable;
 		Version latestVersion;
@@ -103,7 +103,19 @@ Current version of this PWSandbox executable is unknown (possibly corrupted), so
 			updateStatusLabel.Text = "Error!";
 			updateDetailsRichTextBox.Text =
 @"An error occured while checking for updates:
-Failed to retrieve information from GitHub Releases. Check your internet connection and try again later.";
+Failed to retrieve information from GitHub Releases.
+Check your internet connection and try again later.";
+
+			return;
+		}
+		catch (RateLimitExceededException)
+		{
+			updateStatusLabel.Text = "Error!";
+			updateDetailsRichTextBox.Text =
+@"An error occured while checking for updates:
+Whoa, slow down!
+You have exceeded the rate limit and the GitHub API has temporarily blocked you.
+Wait about an hour and try again.";
 
 			return;
 		}
