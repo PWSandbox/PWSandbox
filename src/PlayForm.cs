@@ -120,12 +120,17 @@ public partial class PlayForm : Form
 			for (int x = 0; x < mapObjects.GetLength(1); x++)
 				switch (mapObjects[y, x])
 				{
+					case MapObject.Unknown:
+						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Unknown]);
+						break;
+
 					case MapObject.Void:
 						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Void]);
 						break;
 
 					case MapObject.Player:
 						playerPosition ??= (x, y);
+						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Void]);
 						break;
 
 					case MapObject.Finish:
@@ -154,10 +159,6 @@ public partial class PlayForm : Form
 
 					case MapObject.Barrier:
 						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Barrier]);
-						break;
-
-					case MapObject.Unknown:
-						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Unknown]);
 						break;
 				}
 
