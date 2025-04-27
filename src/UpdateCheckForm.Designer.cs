@@ -150,7 +150,7 @@ partial class UpdateCheckForm
 		Name = "UpdateCheckForm";
 		StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 		Text = "PWSandbox Updater";
-		Load += OnFormLoad;
+		Load += CheckForUpdates;
 		ResumeLayout(false);
 		PerformLayout();
 	}
