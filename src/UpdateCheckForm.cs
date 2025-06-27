@@ -1,4 +1,4 @@
-// This file is a part of PWSandbox ( https://github.com/yarb00/PWSandbox )
+// This file is a part of PWSandbox ( https://github.com/PWSandbox/PWSandbox )
 // PWSandbox is licensed under the MIT (Expat) License:
 
 /* MIT License
@@ -153,7 +153,7 @@ Wait about an hour and try again.";
 
 		try
 		{
-			releases = await githubClient.Repository.Release.GetAll("yarb00", "PWSandbox");
+			releases = await githubClient.Repository.Release.GetAll("PWSandbox", "PWSandbox");
 		}
 		catch (Exception)
 		{
