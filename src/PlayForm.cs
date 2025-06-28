@@ -31,14 +31,6 @@ using System.Windows.Forms;
 
 namespace PWSandbox;
 
-public enum MapObject
-{
-	Unknown = -1, Void,
-	Player,
-	Finish,
-	Wall, FakeWall, Barrier
-}
-
 public partial class PlayForm : Form
 {
 	private readonly MapObject[,] mapObjects;

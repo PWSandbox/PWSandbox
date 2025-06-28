@@ -28,7 +28,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace PWSandbox;
@@ -56,149 +55,48 @@ public partial class MenuForm : Form
 
 	#region Map loading
 
-	public static MapObject[,] ParseMapFromFile(string filePath)
-	{
-		string[] mapLines;
-
-		try
-		{
-			mapLines = File.ReadAllLines(filePath);
-		}
-		catch (Exception)
-		{
-			throw;
-		}
-
-		for (int y = 0; y < 3; y++)
-		{
-			mapLines = mapLines.Where(str => !string.IsNullOrWhiteSpace(str)).ToArray();
-
-			switch (y)
-			{
-				case 0:
-					if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.0;", true, null))
-					{
-						mapLines[0] = mapLines[0].TrimStart().Remove(0, "?PWSandbox-Map 1.0;".Length);
-						continue;
-					}
-					else
-					{
-						throw new FormatException($"File \"{filePath}\" doesn't contain map header or version of standard in map header is unsupported");
-					}
-
-				case 1:
-					if (mapLines[0].TrimStart().StartsWith("(map: begin)", true, null))
-					{
-						mapLines[0] = mapLines[0].TrimStart().Remove(0, "(map: begin)".Length);
-						continue;
-					}
-					else
-					{
-						throw new FormatException($"Expected \"(map: begin)\" block after map header (\"?PWSandbox-Map 1.0;\") in file \"{filePath}\", but it was not found");
-					}
-
-				case 2:
-					if (mapLines[^1].TrimEnd().EndsWith("(map: end)", true, null))
-					{
-						mapLines[^1] = mapLines[^1].TrimEnd().Remove(mapLines[^1].Length - "(map: end)".Length, "(map: end)".Length);
-						mapLines = mapLines.Where(str => !string.IsNullOrWhiteSpace(str)).ToArray();
-
-						break;
-					}
-					else
-					{
-						throw new FormatException($"Expected \"(map: end)\" block in the end of file \"{filePath}\", but it was not found");
-					}
-			}
-		}
-
-		int maxX = 0;
-		for (int y = 0; y < mapLines.Length; y++)
-			if (maxX < mapLines[y].Length)
-				maxX = mapLines[y].Length;
-
-		MapObject[,] mapObjects = new MapObject[mapLines.Length, maxX];
-
-		for (int y = 0; y < mapLines.Length; y++)
-			for (int x = 0; x < mapLines[y].Length; x++)
-				mapObjects[y, x] = mapLines[y][x] switch
-				{
-					' ' => MapObject.Void,
-					'!' => MapObject.Player,
-					'=' => MapObject.Finish,
-					'@' => MapObject.Wall,
-					'#' => MapObject.FakeWall,
-					'*' => MapObject.Barrier,
-					_ => MapObject.Unknown
-				};
-
-		return mapObjects;
-	}
-
 	private void LoadMapFile(object sender, EventArgs e)
 	{
-		MapObject[,] mapObjects;
-
 		if (mapOpenFileDialog.ShowDialog() == DialogResult.Cancel) return;
 
 		string mapFileLocation = mapOpenFileDialog.FileName;
+		string? errorText = null;
 
+		MapObject[,]? mapObjects = null;
 		try
 		{
-			mapObjects = ParseMapFromFile(mapFileLocation);
+			mapObjects = MapParser.ParseMapFromFile(mapFileLocation);
 		}
 		catch (FileNotFoundException)
 		{
-			MessageBox.Show(
-				$"File \"{mapFileLocation}\" does not exist.",
-				"PWSandbox",
-				MessageBoxButtons.OK,
-				MessageBoxIcon.Error,
-				MessageBoxDefaultButton.Button1
-			);
-
-			return;
+			errorText = $"File \"{mapFileLocation}\" does not exist.";
 		}
 		catch (ArgumentException ex) when (ex.ParamName == "path")
 		{
-			MessageBox.Show(
-				"Please enter a valid path of the map file.",
-				"PWSandbox",
-				MessageBoxButtons.OK,
-				MessageBoxIcon.Error,
-				MessageBoxDefaultButton.Button1
-			);
-
-			return;
+			errorText = "Path of the map file is not valid.";
 		}
-		catch (FormatException ex) when (ex.Message.Contains("(map: end)", StringComparison.OrdinalIgnoreCase))
+		catch (FileFormatException)
+		{
+			errorText = "The file you selected is empty and does not contain a valid PWSandbox map.";
+		}
+		catch (Exception ex) when (ex is FormatException or NotSupportedException)
+		{
+			errorText = $"""
+				Map file is not valid!
+				It's either made for a newer version of PWSandbox or just written incorrectly.
+
+				Contact map maker and let them know about this problem.
+				(If you are the map maker and map file is being loaded with the right version of PWSandbox,
+				then you wrote map file in a wrong way. Check detailed message.)
+
+				Detailed message: "{ex.Message}"
+				""";
+		}
+
+		if (errorText is not null)
 		{
 			MessageBox.Show(
-				$"An error occured while parsing map \"{mapFileLocation}\": expected \"(map: end)\" in the end of file, but it was not found.",
-				"PWSandbox",
-				MessageBoxButtons.OK,
-				MessageBoxIcon.Error,
-				MessageBoxDefaultButton.Button1
-			);
-
-			return;
-		}
-		catch (FormatException ex) when (ex.Message.Contains("(map: begin)", StringComparison.OrdinalIgnoreCase))
-		{
-			MessageBox.Show(
-				$"An error occured while parsing map \"{mapFileLocation}\": expected \"(map: begin)\" after map header (\"?PWSandbox-Map 1.0;\"), but it was not found.",
-				"PWSandbox",
-				MessageBoxButtons.OK,
-				MessageBoxIcon.Error,
-				MessageBoxDefaultButton.Button1
-			);
-
-			return;
-		}
-		catch (FormatException ex) when (ex.Message.Contains("map header", StringComparison.OrdinalIgnoreCase))
-		{
-			MessageBox.Show(
-				$"File \"{mapFileLocation}\" is not a valid PWSandbox map or it is a map designed for a newer/older version of PWSandbox.",
+				errorText,
 				"PWSandbox",
 				MessageBoxButtons.OK,
 				MessageBoxIcon.Error,
@@ -219,7 +117,7 @@ public partial class MenuForm : Form
 				}
 				: null;
 
-		new PlayForm(mapObjects, colors).Show();
+		new PlayForm(mapObjects!, colors).Show();
 	}
 
 	#endregion
