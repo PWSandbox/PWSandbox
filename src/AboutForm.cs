@@ -24,8 +24,6 @@
  * SOFTWARE.
  */
 
-using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace PWSandbox;
@@ -36,38 +34,37 @@ public partial class AboutForm : Form
 	{
 		InitializeComponent();
 
-		if (menuForm?.appVersion is null) appVersionLabel.Text = "Missing version!";
-		else appVersionLabel.Text = $"v{menuForm.appVersion.ToString(3)}";
+		if (menuForm?.AppVersion is not null) appVersionLabel.Text = $"v{menuForm.AppVersion.ToString(3)}";
 
-		appDescriptionRichTextBox.Text =
-@"Simple sandbox game, built with .NET and Windows Forms.
+		appDescriptionRichTextBox.Text = """
+			Simple sandbox game, built with .NET and Windows Forms.
 
-You can find the PWSandbox Git repository at https://github.com/PWSandbox/PWSandbox.
+			You can find the PWSandbox Git repository at https://github.com/PWSandbox/PWSandbox.
 
-This software is licensed under the MIT (Expat) License. You can find its text below.";
+			This software is licensed under the MIT (Expat) License. You can find its text below.
+			""";
 
-		appLicenseRichTextBox.Text =
-@"MIT License
+		appLicenseRichTextBox.Text = """
+			Copyright (c) 2024-2025 yarb00
 
-Copyright (c) 2024-2025 yarb00
+			Permission is hereby granted, free of charge, to any person obtaining a copy
+			of this software and associated documentation files (the ""Software""), to deal
+			in the Software without restriction, including without limitation the rights
+			to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+			copies of the Software, and to permit persons to whom the Software is
+			furnished to do so, subject to the following conditions:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the ""Software""), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+			The above copyright notice and this permission notice shall be included in all
+			copies or substantial portions of the Software.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.";
+			THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+			IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+			FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+			AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+			LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+			OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+			SOFTWARE.
+			""";
 
 		SetTheme(menuForm?.CurrentColorTheme ?? Theme.SimpleDark);
 	}
@@ -79,28 +76,22 @@ SOFTWARE.";
 
 	private void SetTheme(Theme colorTheme)
 	{
-		Color
-			backgroundColor = colorTheme switch
-			{
-				Theme.SimpleLight => Color.White,
-				Theme.SimpleDark => Color.Black,
-				_ => throw new NotImplementedException()
-			},
-			foregroundColor = colorTheme switch
-			{
-				Theme.SimpleLight => Color.Black,
-				Theme.SimpleDark => Color.White,
-				_ => throw new NotImplementedException()
-			};
+		var GuiColor = MenuForm.GuiColor[colorTheme];
 
-		BackColor =
+		BackColor = GuiColor[ControlColor.Background];
+		ForeColor = GuiColor[ControlColor.Foreground];
+
+		okButton.BackColor =
 		appDescriptionRichTextBox.BackColor =
 		appLicenseRichTextBox.BackColor =
-		backgroundColor;
+		GuiColor[ControlColor.ButtonBackground];
 
-		ForeColor =
+		okButton.ForeColor =
 		appDescriptionRichTextBox.ForeColor =
 		appLicenseRichTextBox.ForeColor =
-		foregroundColor;
+		GuiColor[ControlColor.ButtonForeground];
+
+		okButton.FlatAppearance.MouseOverBackColor = GuiColor[ControlColor.ButtonHovered];
+		okButton.FlatAppearance.MouseDownBackColor = GuiColor[ControlColor.ButtonClicked];
 	}
 }

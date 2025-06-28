@@ -38,19 +38,54 @@ public enum Theme
 	SimpleLight
 }
 
+public enum ControlColor
+{
+	Background, Foreground,
+	ButtonBackground, ButtonForeground,
+	ButtonHovered, ButtonClicked
+}
+
 public partial class MenuForm : Form
 {
+	#region GUI colors
+
+	private static readonly Dictionary<ControlColor, Color> GuiColor_SimpleDark = new()
+	{
+		{ ControlColor.Background, Color.Black },
+		{ ControlColor.Foreground, Color.White },
+		{ ControlColor.ButtonBackground, Color.FromArgb(64, 64, 64) },
+		{ ControlColor.ButtonForeground, Color.White },
+		{ ControlColor.ButtonHovered, Color.Gray },
+		{ ControlColor.ButtonClicked, Color.DimGray }
+	};
+
+	private static readonly Dictionary<ControlColor, Color> GuiColor_SimpleLight = new()
+	{
+		{ ControlColor.Background, Color.White },
+		{ ControlColor.Foreground, Color.Black },
+		{ ControlColor.ButtonBackground, Color.Silver },
+		{ ControlColor.ButtonForeground, Color.Black },
+		{ ControlColor.ButtonHovered, Color.Gray },
+		{ ControlColor.ButtonClicked, Color.FromArgb(64, 64, 64) }
+	};
+
+	public static readonly Dictionary<Theme, Dictionary<ControlColor, Color>> GuiColor = new()
+	{
+		{ Theme.SimpleDark, GuiColor_SimpleDark },
+		{ Theme.SimpleLight, GuiColor_SimpleLight }
+	};
+
+	#endregion
+
 	public Theme CurrentColorTheme { get; private set; } = Theme.SimpleDark;
-	public readonly Version? appVersion = null;
+	public readonly Version? AppVersion;
 
 	public MenuForm()
 	{
 		InitializeComponent();
 
-		appVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-
-		if (appVersion is null) appVersionLabel.Text = "Missing version!";
-		else appVersionLabel.Text = $"v{appVersion.ToString(3)}";
+		AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+		if (AppVersion is not null) Text += $" v{AppVersion.ToString(3)}";
 	}
 
 	#region Map loading
@@ -107,10 +142,8 @@ public partial class MenuForm : Form
 		{
 			Theme.SimpleDark => new()
 			{
-				{ MapObject.Void, Color.Black },
-				{ MapObject.Wall, Color.White },
-				{ MapObject.FakeWall, Color.White },
-				{ MapObject.Barrier, Color.Black }
+				{ MapObject.Wall, Color.FromArgb(64, 64, 64) },
+				{ MapObject.FakeWall, Color.FromArgb(64, 64, 64) }, // Same color as Wall
 			},
 			_ => null
 		};
@@ -122,30 +155,24 @@ public partial class MenuForm : Form
 
 	private void SwitchTheme(object sender, EventArgs e)
 	{
-		CurrentColorTheme =
-			CurrentColorTheme == Theme.SimpleLight
-				? Theme.SimpleDark
-				: Theme.SimpleLight;
+		CurrentColorTheme = CurrentColorTheme switch
+		{
+			Theme.SimpleLight => Theme.SimpleDark,
+			Theme.SimpleDark => Theme.SimpleLight,
+			_ => throw new NotImplementedException()
+		};
 
-		Color
-			backgroundColor = CurrentColorTheme switch
-			{
-				Theme.SimpleLight => Color.White,
-				Theme.SimpleDark => Color.Black,
-				_ => throw new NotImplementedException()
-			},
-			foregroundColor = CurrentColorTheme switch
-			{
-				Theme.SimpleLight => Color.Black,
-				Theme.SimpleDark => Color.White,
-				_ => throw new NotImplementedException()
-			};
+		BackColor = GuiColor[CurrentColorTheme][ControlColor.Background];
+		ForeColor = GuiColor[CurrentColorTheme][ControlColor.Foreground];
+		foreach (Control control in Controls)
+		{
+			if (control is not Button button) continue;
 
-		BackColor =
-		backgroundColor;
-
-		ForeColor =
-		foregroundColor;
+			button.BackColor = GuiColor[CurrentColorTheme][ControlColor.ButtonBackground];
+			button.ForeColor = GuiColor[CurrentColorTheme][ControlColor.ButtonForeground];
+			button.FlatAppearance.MouseOverBackColor = GuiColor[CurrentColorTheme][ControlColor.ButtonHovered];
+			button.FlatAppearance.MouseDownBackColor = GuiColor[CurrentColorTheme][ControlColor.ButtonClicked];
+		}
 	}
 
 	private void OpenAboutAppDialog(object sender, EventArgs e)

@@ -53,46 +53,52 @@ partial class AboutForm
 		// okButton
 		//
 		okButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+		okButton.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
 		okButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+		okButton.FlatAppearance.BorderSize = 0;
+		okButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Gray;
+		okButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.DimGray;
 		okButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-		okButton.Location = new System.Drawing.Point(236, 344);
+		okButton.Location = new System.Drawing.Point(266, 366);
 		okButton.Name = "okButton";
 		okButton.Size = new System.Drawing.Size(88, 27);
-		okButton.TabIndex = 0;
+		okButton.TabIndex = 7;
 		okButton.Text = "&OK";
+		okButton.UseVisualStyleBackColor = false;
 		//
 		// appDescriptionRichTextBox
 		//
-		appDescriptionRichTextBox.BackColor = System.Drawing.Color.Black;
-		appDescriptionRichTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+		appDescriptionRichTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+		appDescriptionRichTextBox.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
+		appDescriptionRichTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
 		appDescriptionRichTextBox.ForeColor = System.Drawing.Color.White;
 		appDescriptionRichTextBox.Location = new System.Drawing.Point(12, 138);
 		appDescriptionRichTextBox.Name = "appDescriptionRichTextBox";
 		appDescriptionRichTextBox.ReadOnly = true;
 		appDescriptionRichTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-		appDescriptionRichTextBox.Size = new System.Drawing.Size(312, 76);
-		appDescriptionRichTextBox.TabIndex = 1;
+		appDescriptionRichTextBox.Size = new System.Drawing.Size(342, 76);
+		appDescriptionRichTextBox.TabIndex = 3;
 		appDescriptionRichTextBox.TabStop = false;
 		appDescriptionRichTextBox.Text = "";
 		appDescriptionRichTextBox.LinkClicked += OnLinkClick;
 		//
 		// copyrightLabel
 		//
+		copyrightLabel.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
 		copyrightLabel.Location = new System.Drawing.Point(12, 79);
 		copyrightLabel.Name = "copyrightLabel";
-		copyrightLabel.Size = new System.Drawing.Size(312, 14);
-		copyrightLabel.TabIndex = 2;
+		copyrightLabel.Size = new System.Drawing.Size(342, 14);
+		copyrightLabel.TabIndex = 1;
 		copyrightLabel.Text = "Copyright (c) 2024-2025 yarb00";
-		copyrightLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+		copyrightLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 		//
 		// appVersionLabel
 		//
-		appVersionLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-		appVersionLabel.Location = new System.Drawing.Point(12, 347);
+		appVersionLabel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+		appVersionLabel.Location = new System.Drawing.Point(12, 369);
 		appVersionLabel.Name = "appVersionLabel";
-		appVersionLabel.Size = new System.Drawing.Size(218, 20);
-		appVersionLabel.TabIndex = 3;
-		appVersionLabel.Text = "Version ?";
+		appVersionLabel.Size = new System.Drawing.Size(248, 20);
+		appVersionLabel.TabIndex = 6;
 		appVersionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 		//
 		// appNameLabel
@@ -101,8 +107,8 @@ partial class AboutForm
 		appNameLabel.Font = new System.Drawing.Font("Consolas", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
 		appNameLabel.Location = new System.Drawing.Point(12, 9);
 		appNameLabel.Name = "appNameLabel";
-		appNameLabel.Size = new System.Drawing.Size(312, 56);
-		appNameLabel.TabIndex = 4;
+		appNameLabel.Size = new System.Drawing.Size(342, 56);
+		appNameLabel.TabIndex = 0;
 		appNameLabel.Text = "PWSandbox";
 		appNameLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 		//
@@ -112,7 +118,7 @@ partial class AboutForm
 		appDescriptionLabel.Location = new System.Drawing.Point(12, 121);
 		appDescriptionLabel.Name = "appDescriptionLabel";
 		appDescriptionLabel.Size = new System.Drawing.Size(91, 14);
-		appDescriptionLabel.TabIndex = 7;
+		appDescriptionLabel.TabIndex = 2;
 		appDescriptionLabel.Text = "Description:";
 		appDescriptionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 		//
@@ -122,31 +128,33 @@ partial class AboutForm
 		appLicenseLabel.Location = new System.Drawing.Point(12, 245);
 		appLicenseLabel.Name = "appLicenseLabel";
 		appLicenseLabel.Size = new System.Drawing.Size(63, 14);
-		appLicenseLabel.TabIndex = 10;
+		appLicenseLabel.TabIndex = 4;
 		appLicenseLabel.Text = "License:";
 		appLicenseLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 		//
 		// appLicenseRichTextBox
 		//
-		appLicenseRichTextBox.BackColor = System.Drawing.Color.Black;
-		appLicenseRichTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+		appLicenseRichTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+		appLicenseRichTextBox.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
+		appLicenseRichTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
 		appLicenseRichTextBox.ForeColor = System.Drawing.Color.White;
 		appLicenseRichTextBox.Location = new System.Drawing.Point(12, 262);
 		appLicenseRichTextBox.Name = "appLicenseRichTextBox";
 		appLicenseRichTextBox.ReadOnly = true;
 		appLicenseRichTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-		appLicenseRichTextBox.Size = new System.Drawing.Size(312, 76);
-		appLicenseRichTextBox.TabIndex = 11;
+		appLicenseRichTextBox.Size = new System.Drawing.Size(342, 76);
+		appLicenseRichTextBox.TabIndex = 5;
 		appLicenseRichTextBox.TabStop = false;
 		appLicenseRichTextBox.Text = "";
 		//
 		// AboutForm
 		//
 		AcceptButton = okButton;
-		AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+		AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+		AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 		BackColor = System.Drawing.Color.Black;
 		CancelButton = okButton;
-		ClientSize = new System.Drawing.Size(336, 379);
+		ClientSize = new System.Drawing.Size(366, 401);
 		Controls.Add(appVersionLabel);
 		Controls.Add(okButton);
 		Controls.Add(appDescriptionRichTextBox);
@@ -159,9 +167,8 @@ partial class AboutForm
 		ForeColor = System.Drawing.Color.White;
 		FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 		MaximizeBox = false;
-		MaximumSize = new System.Drawing.Size(352, 418);
 		MinimizeBox = false;
-		MinimumSize = new System.Drawing.Size(352, 418);
+		MinimumSize = new System.Drawing.Size(352, 440);
 		Name = "AboutForm";
 		ShowIcon = false;
 		ShowInTaskbar = false;

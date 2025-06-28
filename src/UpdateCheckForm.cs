@@ -27,7 +27,6 @@
 using Octokit;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -43,7 +42,7 @@ public partial class UpdateCheckForm : Form
 	{
 		InitializeComponent();
 
-		currentVersion = menuForm?.appVersion;
+		currentVersion = menuForm?.AppVersion;
 
 		if (currentVersion is null) appVersionLabel.Text = "Current installed version: Missing version!";
 		else appVersionLabel.Text = $"Current installed version: v{currentVersion.ToString(3)}";
@@ -53,27 +52,23 @@ public partial class UpdateCheckForm : Form
 
 	private void SetTheme(Theme colorTheme)
 	{
-		Color
-			backgroundColor = colorTheme switch
-			{
-				Theme.SimpleLight => Color.White,
-				Theme.SimpleDark => Color.Black,
-				_ => throw new NotImplementedException()
-			},
-			foregroundColor = colorTheme switch
-			{
-				Theme.SimpleLight => Color.Black,
-				Theme.SimpleDark => Color.White,
-				_ => throw new NotImplementedException()
-			};
+		var GuiColor = MenuForm.GuiColor[colorTheme];
 
-		BackColor =
-		updateDetailsRichTextBox.BackColor =
-		backgroundColor;
+		BackColor = GuiColor[ControlColor.Background];
+		ForeColor = GuiColor[ControlColor.Foreground];
 
-		ForeColor =
-		updateDetailsRichTextBox.ForeColor =
-		foregroundColor;
+		updateDetailsRichTextBox.BackColor = GuiColor[ControlColor.ButtonBackground];
+		updateDetailsRichTextBox.ForeColor = GuiColor[ControlColor.ButtonForeground];
+
+		foreach (Control control in Controls)
+		{
+			if (control is not Button button) continue;
+
+			button.BackColor = GuiColor[ControlColor.ButtonBackground];
+			button.ForeColor = GuiColor[ControlColor.ButtonForeground];
+			button.FlatAppearance.MouseOverBackColor = GuiColor[ControlColor.ButtonHovered];
+			button.FlatAppearance.MouseDownBackColor = GuiColor[ControlColor.ButtonClicked];
+		}
 	}
 
 	private async void CheckForUpdates(object sender, EventArgs e)
@@ -81,9 +76,10 @@ public partial class UpdateCheckForm : Form
 		if (currentVersion is null)
 		{
 			updateStatusLabel.Text = "Error!";
-			updateDetailsRichTextBox.Text =
-@"An error occured while checking for updates:
-Current version of this PWSandbox executable is unknown (possibly corrupted), so it's impossible to check for updates.";
+			updateDetailsRichTextBox.Text = """
+				An error occured while checking for updates:
+				Current version of this PWSandbox executable is unknown (possibly corrupted), so it's impossible to check for updates.
+				""";
 
 			return;
 		}
@@ -101,21 +97,23 @@ Current version of this PWSandbox executable is unknown (possibly corrupted), so
 		catch (HttpRequestException)
 		{
 			updateStatusLabel.Text = "Error!";
-			updateDetailsRichTextBox.Text =
-@"An error occured while checking for updates:
-Failed to retrieve information from GitHub Releases.
-Check your internet connection and try again later.";
+			updateDetailsRichTextBox.Text = """
+				An error occured while checking for updates:
+				Failed to retrieve information from GitHub Releases.
+				Check your internet connection and try again later.
+				""";
 
 			return;
 		}
 		catch (RateLimitExceededException)
 		{
 			updateStatusLabel.Text = "Error!";
-			updateDetailsRichTextBox.Text =
-@"An error occured while checking for updates:
-Whoa, slow down!
-You have exceeded the rate limit and the GitHub API has temporarily blocked you.
-Wait about an hour and try again.";
+			updateDetailsRichTextBox.Text = """
+				An error occured while checking for updates:
+				Whoa, slow down!
+				You have exceeded the rate limit and the GitHub API has temporarily blocked you.
+				Wait about an hour and try again.
+				""";
 
 			return;
 		}
@@ -162,11 +160,11 @@ Wait about an hour and try again.";
 
 		Release latestRelease = releases[0];
 
-		if (!latestRelease.TagName.StartsWith("v"))
+		if (!latestRelease.TagName.StartsWith('v'))
 			throw new FormatException("Tag name doesn't begin with \"v\"");
 
 		Version
-			fetchedVersion = Version.Parse(latestRelease.TagName.Substring(1)),
+			fetchedVersion = Version.Parse(latestRelease.TagName.AsSpan(1)),
 
 			latestVersion = new(
 				fetchedVersion.Major,

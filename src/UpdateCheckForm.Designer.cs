@@ -72,23 +72,33 @@ partial class UpdateCheckForm
 		// cancelButton
 		//
 		cancelButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+		cancelButton.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
+		cancelButton.FlatAppearance.BorderSize = 0;
+		cancelButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;
+		cancelButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
 		cancelButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 		cancelButton.Location = new System.Drawing.Point(358, 282);
 		cancelButton.Name = "cancelButton";
 		cancelButton.Size = new System.Drawing.Size(94, 27);
-		cancelButton.TabIndex = 4;
-		cancelButton.Text = "Cancel";
+		cancelButton.TabIndex = 6;
+		cancelButton.Text = "&Cancel";
+		cancelButton.UseVisualStyleBackColor = false;
 		//
 		// viewUpdateButton
 		//
 		viewUpdateButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+		viewUpdateButton.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
 		viewUpdateButton.Enabled = false;
+		viewUpdateButton.FlatAppearance.BorderSize = 0;
+		viewUpdateButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;
+		viewUpdateButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
 		viewUpdateButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 		viewUpdateButton.Location = new System.Drawing.Point(358, 249);
 		viewUpdateButton.Name = "viewUpdateButton";
 		viewUpdateButton.Size = new System.Drawing.Size(94, 27);
-		viewUpdateButton.TabIndex = 6;
-		viewUpdateButton.Text = "View update";
+		viewUpdateButton.TabIndex = 4;
+		viewUpdateButton.Text = "&View update";
+		viewUpdateButton.UseVisualStyleBackColor = false;
 		viewUpdateButton.Visible = false;
 		viewUpdateButton.Click += ViewUpdate;
 		//
@@ -99,22 +109,22 @@ partial class UpdateCheckForm
 		newVersionLabel.Location = new System.Drawing.Point(12, 252);
 		newVersionLabel.Name = "newVersionLabel";
 		newVersionLabel.Size = new System.Drawing.Size(340, 20);
-		newVersionLabel.TabIndex = 7;
+		newVersionLabel.TabIndex = 3;
 		newVersionLabel.Text = "Newer version available! (Version ?)";
 		newVersionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 		newVersionLabel.Visible = false;
 		//
 		// updateDetailsRichTextBox
 		//
-		updateDetailsRichTextBox.BackColor = System.Drawing.Color.Black;
-		updateDetailsRichTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+		updateDetailsRichTextBox.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
+		updateDetailsRichTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
 		updateDetailsRichTextBox.ForeColor = System.Drawing.Color.White;
 		updateDetailsRichTextBox.Location = new System.Drawing.Point(12, 96);
 		updateDetailsRichTextBox.Name = "updateDetailsRichTextBox";
 		updateDetailsRichTextBox.ReadOnly = true;
 		updateDetailsRichTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
 		updateDetailsRichTextBox.Size = new System.Drawing.Size(440, 147);
-		updateDetailsRichTextBox.TabIndex = 8;
+		updateDetailsRichTextBox.TabIndex = 2;
 		updateDetailsRichTextBox.TabStop = false;
 		updateDetailsRichTextBox.Text = "";
 		//
@@ -124,14 +134,15 @@ partial class UpdateCheckForm
 		updateDetailsLabel.Location = new System.Drawing.Point(12, 79);
 		updateDetailsLabel.Name = "updateDetailsLabel";
 		updateDetailsLabel.Size = new System.Drawing.Size(63, 14);
-		updateDetailsLabel.TabIndex = 11;
+		updateDetailsLabel.TabIndex = 1;
 		updateDetailsLabel.Text = "Details:";
 		updateDetailsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 		//
 		// UpdateCheckForm
 		//
 		AcceptButton = viewUpdateButton;
-		AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+		AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+		AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 		BackColor = System.Drawing.Color.Black;
 		CancelButton = cancelButton;
 		ClientSize = new System.Drawing.Size(464, 321);
