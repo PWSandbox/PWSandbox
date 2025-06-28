@@ -27,13 +27,13 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
 
 namespace PWSandbox;
 
 public enum MapVersion
 {
-	V1_0
+	V1_0,
+	V1_1 // Added '.' as alias to ' ' ("Void" object)
 }
 
 public enum MapObject
@@ -70,6 +70,8 @@ public static class MapParser
 		{
 			if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.0;", true, null))
 				mapVersion = MapVersion.V1_0;
+			else if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.1;", true, null))
+				mapVersion = MapVersion.V1_1;
 			else throw new NotSupportedException("Failed to detect map version");
 		}
 
@@ -78,6 +80,7 @@ public static class MapParser
 			return mapVersion switch
 			{
 				MapVersion.V1_0 => ParseMapV1_0(mapLines),
+				MapVersion.V1_1 => ParseMapV1_1(mapLines),
 				_ => throw new NotImplementedException()
 			};
 		}
@@ -89,18 +92,22 @@ public static class MapParser
 
 	#region Parsers
 
-	private static MapObject[,] ParseMapV1_0(string[] mapLines)
+	private static MapObject[,] ParseMapV1_0(string[] mapLines) => ParseMapV1_1(mapLines, true);
+
+	private static MapObject[,] ParseMapV1_1(string[] mapLines, bool legacyBehaviour = false)
 	{
 		for (int y = 0; y < 3; y++)
 		{
+			string mapHeader = legacyBehaviour ? "?PWSandbox-Map 1.0;" : "?PWSandbox-Map 1.1;";
+
 			mapLines = mapLines.Where(str => !string.IsNullOrWhiteSpace(str)).ToArray();
 
 			switch (y)
 			{
 				case 0:
-					if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.0;", true, null))
+					if (mapLines[0].TrimStart().StartsWith(mapHeader, true, null))
 					{
-						mapLines[0] = mapLines[0].TrimStart().Remove(0, "?PWSandbox-Map 1.0;".Length);
+						mapLines[0] = mapLines[0].TrimStart().Remove(0, mapHeader.Length);
 						continue;
 					}
 					else throw new FormatException($"Map header with supported version of standard was not found");
@@ -111,7 +118,7 @@ public static class MapParser
 						mapLines[0] = mapLines[0].TrimStart().Remove(0, "(map: begin)".Length);
 						continue;
 					}
-					else throw new FormatException($"Expected \"(map: begin)\" block after map header (\"?PWSandbox-Map 1.0;\"), but it was not found");
+					else throw new FormatException($"Expected \"(map: begin)\" block after map header (\"?{mapHeader}\"), but it was not found");
 
 				case 2:
 					if (mapLines[^1].TrimEnd().EndsWith("(map: end)", true, null))
@@ -137,6 +144,7 @@ public static class MapParser
 				mapObjects[y, x] = mapLines[y][x] switch
 				{
 					' ' => MapObject.Void,
+					'.' when !legacyBehaviour => MapObject.Void,
 					'!' => MapObject.Player,
 					'=' => MapObject.Finish,
 					'@' => MapObject.Wall,
