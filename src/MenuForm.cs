@@ -58,30 +58,40 @@ public partial class MenuForm : Form
 	private void LoadMapFile(object sender, EventArgs e)
 	{
 		if (mapOpenFileDialog.ShowDialog() == DialogResult.Cancel) return;
+		(PlayForm? playForm, string? errorText) = GetLoadedPlayForm(mapOpenFileDialog.FileName, CurrentColorTheme);
 
-		string mapFileLocation = mapOpenFileDialog.FileName;
-		string? errorText = null;
+		if (errorText is not null) MessageBox.Show(
+			errorText,
+			"PWSandbox",
+			MessageBoxButtons.OK,
+			MessageBoxIcon.Error,
+			MessageBoxDefaultButton.Button1
+		);
+		playForm?.Show();
+	}
 
-		MapObject[,]? mapObjects = null;
+	public static (PlayForm? playForm, string? errorText) GetLoadedPlayForm(string mapFileLocation, Theme? colorTheme = null)
+	{
+		MapObject[,] mapObjects;
 		try
 		{
 			mapObjects = MapParser.ParseMapFromFile(mapFileLocation);
 		}
-		catch (FileNotFoundException)
+		catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
 		{
-			errorText = $"File \"{mapFileLocation}\" does not exist.";
+			return (null, $"File \"{mapFileLocation}\" does not exist.");
 		}
 		catch (ArgumentException ex) when (ex.ParamName == "path")
 		{
-			errorText = "Path of the map file is not valid.";
+			return (null, "Path of the map file is not valid.");
 		}
 		catch (FileFormatException)
 		{
-			errorText = "The file you selected is empty and does not contain a valid PWSandbox map.";
+			return (null, "The file you selected is empty and does not contain a valid PWSandbox map.");
 		}
 		catch (Exception ex) when (ex is FormatException or NotSupportedException)
 		{
-			errorText = $"""
+			return (null, $"""
 				Map file is not valid!
 				It's either made for a newer version of PWSandbox or just written incorrectly.
 
@@ -90,34 +100,22 @@ public partial class MenuForm : Form
 				then you wrote map file in a wrong way. Check detailed message.)
 
 				Detailed message: "{ex.Message}"
-				""";
+				""");
 		}
 
-		if (errorText is not null)
+		Dictionary<MapObject, Color>? colors = colorTheme switch
 		{
-			MessageBox.Show(
-				errorText,
-				"PWSandbox",
-				MessageBoxButtons.OK,
-				MessageBoxIcon.Error,
-				MessageBoxDefaultButton.Button1
-			);
+			Theme.SimpleDark => new()
+			{
+				{ MapObject.Void, Color.Black },
+				{ MapObject.Wall, Color.White },
+				{ MapObject.FakeWall, Color.White },
+				{ MapObject.Barrier, Color.Black }
+			},
+			_ => null
+		};
 
-			return;
-		}
-
-		Dictionary<MapObject, Color>? colors =
-			CurrentColorTheme == Theme.SimpleDark
-				? new()
-				{
-					{ MapObject.Void, Color.Black },
-					{ MapObject.Wall, Color.White },
-					{ MapObject.FakeWall, Color.White },
-					{ MapObject.Barrier, Color.Black }
-				}
-				: null;
-
-		new PlayForm(mapObjects!, colors).Show();
+		return (new PlayForm(mapObjects, colors), null);
 	}
 
 	#endregion

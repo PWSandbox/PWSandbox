@@ -25,6 +25,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
@@ -34,7 +35,7 @@ namespace PWSandbox;
 static class Program
 {
 	[STAThread]
-	static void Main()
+	static void Main(string[] args)
 	{
 		if (!Debugger.IsAttached)
 		{
@@ -45,8 +46,87 @@ static class Program
 		}
 
 		Application.EnableVisualStyles();
-		Application.Run(new MenuForm());
+
+		if (args.Length == 0) Application.Run(new MenuForm());
+		else Application.Run(new CommandLineArgumentsApplicationContext(args));
 	}
+
+	class CommandLineArgumentsApplicationContext : ApplicationContext
+	{
+		private int openForms = 0;
+
+		internal CommandLineArgumentsApplicationContext(string[] filePaths)
+		{
+			int totalForms = filePaths.Length, successForms = 0, errorForms = 0;
+			List<string> results = [];
+
+			foreach (string filePath in filePaths)
+			{
+				(PlayForm? playForm, string? errorText) = MenuForm.GetLoadedPlayForm(filePath);
+
+				if (errorText is not null)
+				{
+					errorForms++;
+					results.Add($"""
+						Map "{filePath}"
+						could not load because of an error:
+						"{errorText}"
+						""");
+				}
+
+				if (playForm is not null)
+				{
+					playForm.Closed += OnFormClosed;
+					playForm.Show();
+					openForms++;
+
+					successForms++;
+					results.Add($"""
+						Map "{filePath}"
+						loaded succesfully.
+						""");
+				}
+			}
+
+			TaskDialogPage resultsDialog = new()
+			{
+				Caption = "PWSandbox: Loading results",
+				Heading = "Loading results",
+				Icon = TaskDialogIcon.Information,
+				SizeToContent = true,
+
+				Buttons = [TaskDialogButton.OK],
+
+				Expander = new TaskDialogExpander
+				{
+					CollapsedButtonText = "Show details",
+					ExpandedButtonText = "Hide details",
+					Text = $"""
+						===== Details: =====
+
+						{string.Join(Environment.NewLine + Environment.NewLine, results)}
+						"""
+
+				},
+
+				Text = $"""
+					Tried to load {totalForms} maps.
+					{successForms} of them loaded succesfully,
+					{errorForms} with errors.
+					"""
+			};
+			resultsDialog.Destroyed += OnFormClosed;
+			TaskDialog.ShowDialog(resultsDialog);
+			openForms++;
+		}
+
+		private void OnFormClosed(object? sender, EventArgs e)
+		{
+			if (--openForms == 0) ExitThread();
+		}
+	}
+
+	#region Handling of unhandled exceptions
 
 	private static void HandleUnhandledException(object sender, UnhandledExceptionEventArgs e)
 		=> HandleUnhandledException((Exception)e.ExceptionObject);
@@ -132,4 +212,6 @@ static class Program
 		.Replace("/", "%2F")
 		.Replace("&", "%26")
 		.ReplaceLineEndings("%0A");
+
+	#endregion
 }
