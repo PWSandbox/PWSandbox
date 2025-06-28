@@ -44,11 +44,12 @@ partial class PlayForm
 		//
 		// PlayForm
 		//
-		AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-		BackColor = System.Drawing.Color.White;
+		AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+		AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+		BackColor = System.Drawing.Color.Black;
 		ClientSize = new System.Drawing.Size(464, 321);
 		DoubleBuffered = true;
-		ForeColor = System.Drawing.Color.Black;
+		ForeColor = System.Drawing.Color.White;
 		FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 		KeyPreview = true;
 		MaximizeBox = false;

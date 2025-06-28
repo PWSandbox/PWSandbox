@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -46,6 +47,7 @@ static class Program
 		}
 
 		Application.EnableVisualStyles();
+		Application.SetDefaultFont(new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point, 0));
 
 		if (args.Length == 0) Application.Run(new MenuForm());
 		else Application.Run(new CommandLineArgumentsApplicationContext(args));

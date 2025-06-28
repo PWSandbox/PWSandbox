@@ -42,12 +42,12 @@ public partial class PlayForm : Form
 	private readonly Dictionary<MapObject, Color> ColorByMapObject = new()
 	{
 		{ MapObject.Unknown, Color.Magenta },
-		{ MapObject.Void, Color.White },
+		{ MapObject.Void, Color.Gray },
 		{ MapObject.Player, Color.Yellow },
 		{ MapObject.Finish, Color.Green },
-		{ MapObject.Wall, Color.Black },
-		{ MapObject.FakeWall, Color.Black }, // Same color as Wall
-		{ MapObject.Barrier, Color.White }, // Same color as Void
+		{ MapObject.Wall, Color.Silver },
+		{ MapObject.FakeWall, Color.Silver }, // Same color as Wall
+		{ MapObject.Barrier, Color.Gray } // Same color as Void
 	};
 
 	public PlayForm(MapObject[,] mapObjects, Dictionary<MapObject, Color>? colorByMapObject = null)
@@ -58,9 +58,10 @@ public partial class PlayForm : Form
 
 		ClientSize = new Size(mapObjects.GetLength(1) * cellSize, mapObjects.GetLength(0) * cellSize);
 
-		if (colorByMapObject is not null)
-			foreach (var color in colorByMapObject)
-				ColorByMapObject[color.Key] = color.Value;
+		if (colorByMapObject is null) return;
+
+		foreach (var color in colorByMapObject) ColorByMapObject[color.Key] = color.Value;
+		BackColor = ColorByMapObject[MapObject.Void];
 	}
 
 	private void OnKeyDown(object sender, KeyEventArgs e)
@@ -112,14 +113,6 @@ public partial class PlayForm : Form
 			for (int x = 0; x < mapObjects.GetLength(1); x++)
 				switch (mapObjects[y, x])
 				{
-					case MapObject.Unknown:
-						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Unknown]);
-						break;
-
-					case MapObject.Void:
-						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Void]);
-						break;
-
 					case MapObject.Player:
 						playerPosition ??= (x, y);
 						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Void]);
@@ -141,16 +134,8 @@ public partial class PlayForm : Form
 						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Finish]);
 						break;
 
-					case MapObject.Wall:
-						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Wall]);
-						break;
-
-					case MapObject.FakeWall:
-						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.FakeWall]);
-						break;
-
-					case MapObject.Barrier:
-						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Barrier]);
+					default:
+						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[mapObjects[y, x]]);
 						break;
 				}
 
@@ -160,7 +145,7 @@ public partial class PlayForm : Form
 
 	private static void DrawCell(Graphics graphics, (int x, int y) coordinates, int cellSize, Color color)
 	{
-		using Brush brush = new SolidBrush(color);
+		using SolidBrush brush = new(color);
 
 		graphics.FillRectangle(
 			brush,
