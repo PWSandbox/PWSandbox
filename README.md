@@ -1,15 +1,14 @@
 # [PWSandbox](https://github.com/PWSandbox/PWSandbox)
 
 *Simple sandbox game, built with .NET and Windows Forms.*
-![436360070-c231e245-2357-4531-a7fd-80d8d7d2b3c0](https://github.com/user-attachments/assets/4b854d4c-5b03-4ea3-abfa-533d8206b9f0)
+![image](https://github.com/user-attachments/assets/f0e0f963-9efb-4070-bd08-08937d71a900)
 
 ## Cross-platform alternative
 
-PWSandbox is a **Windows-only** app!
-If you're not on Windows, check out [PWSandboxConsole](https://github.com/PWSandbox/PWSandboxConsole): a **cross-platform** *console* version of PWSandbox.
+Replacing WinForms with something cross-platform is planned for version 2.0 (see [issue #28](https://github.com/PWSandbox/PWSandbox/issues/28)),
+however for now PWSandbox is **Windows-only**.
 
-> [!WARNING]
-> PWSandboxConsole is still in the early stages of development. Expect a lot of bugs.
+If your OS isn't Windows, check out [PWSandbox.Tui](https://github.com/PWSandbox/PWSandbox.Tui): a **cross-platform** *console* version of PWSandbox.
 
 > [!IMPORTANT]
-> There are no compiled assemblies of PWSandboxConsole. You will have to compile it yourself.
+> There are no compiled assemblies of PWSandbox.Tui. You will have to compile it yourself.
