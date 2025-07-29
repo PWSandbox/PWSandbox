@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="245" d:DesignHeight="175"
+        MinWidth="245" MinHeight="175"
+        x:Class="PWSandbox.MainWindow"
+        Title="PWSandbox">
+
+    <StackPanel>
+        <Border Margin="5" CornerRadius="10" Background="Blue">
+            <TextBlock Text="PWSandbox v2.0 will be here soon!"
+                       Margin="5"
+                       FontSize="12"
+                       HorizontalAlignment="Center"
+                       Name="MainText" />
+        </Border>
+
+        <Button Click="MakeSure"
+                Margin="5"
+                HorizontalAlignment="Center">
+                Are you sure?</Button>
+    </StackPanel>
+</Window>
