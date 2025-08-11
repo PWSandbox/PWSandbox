@@ -1,3 +1,9 @@
+# Legacy!
+
+This is the legacy 1.x branch of PWSandbox, based on Windows Forms.
+
+The new cross-platform PWSandbox is available at `avalonia-dev` branch.
+
 # [PWSandbox](https://github.com/PWSandbox/PWSandbox)
 
 *Simple sandbox game, built with .NET and Windows Forms.*
