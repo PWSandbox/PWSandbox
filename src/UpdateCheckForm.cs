@@ -3,28 +3,26 @@
 
 using Octokit;
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PWSandbox;
 
-public partial class UpdateCheckForm : Form
+partial class UpdateCheckForm : Form
 {
-	private string? updateUrl = null;
-	private readonly Version? currentVersion;
+	private (bool isUpdateAvailable, Version latestVersion, string releaseUrl)? updateInfo;
 
-	public UpdateCheckForm(MenuForm? menuForm = null)
+	public UpdateCheckForm((bool isUpdateAvailable, Version latestVersion, string releaseUrl)? updateInfo = null,
+		Theme colorTheme = Theme.SimpleDark)
 	{
 		InitializeComponent();
 
-		currentVersion = menuForm?.AppVersion;
+		if (Program.Version is null) appVersionLabel.Text = "Installed version: Unknown!";
+		else appVersionLabel.Text = $"Installed version: {Program.Version.ToString(3)}";
 
-		if (currentVersion is null) appVersionLabel.Text = "Current installed version: Missing version!";
-		else appVersionLabel.Text = $"Current installed version: v{currentVersion.ToString(3)}";
-
-		SetTheme(menuForm?.CurrentColorTheme ?? Theme.SimpleDark);
+		this.updateInfo = updateInfo;
+		SetTheme(colorTheme);
 	}
 
 	private void SetTheme(Theme colorTheme)
@@ -34,8 +32,8 @@ public partial class UpdateCheckForm : Form
 		BackColor = GuiColor[ControlColor.Background];
 		ForeColor = GuiColor[ControlColor.Foreground];
 
-		updateDetailsRichTextBox.BackColor = GuiColor[ControlColor.ButtonBackground];
-		updateDetailsRichTextBox.ForeColor = GuiColor[ControlColor.ButtonForeground];
+		updateDetailsRichTextBox.BackColor = GuiColor[ControlColor.TextBoxBackground];
+		updateDetailsRichTextBox.ForeColor = GuiColor[ControlColor.TextBoxForeground];
 
 		foreach (Control control in Controls)
 		{
@@ -50,54 +48,83 @@ public partial class UpdateCheckForm : Form
 
 	private async void CheckForUpdates(object sender, EventArgs e)
 	{
-		if (currentVersion is null)
+		if (Program.Version is null)
 		{
 			updateStatusLabel.Text = "Error!";
 			updateDetailsRichTextBox.Text = """
-				An error occured while checking for updates:
-				Current version of this PWSandbox executable is unknown (possibly corrupted), so it's impossible to check for updates.
+				An error occurred while checking for updates:
+				Current version of this PWSandbox executable is unknown (possibly corrupted!), so it's impossible to check for updates.
 				""";
 
 			return;
 		}
-
-		updateStatusLabel.Text = "Checking for updates...";
-		updateDetailsRichTextBox.Text = "Please wait... Fetching the latest data from the GitHub Releases API...";
 
 		bool isUpdateAvailable;
 		Version latestVersion;
+		string updateUrl;
 
-		try
+		if (updateInfo is not null) (isUpdateAvailable, latestVersion, updateUrl) = ((bool, Version, string))updateInfo;
+		else
 		{
-			(isUpdateAvailable, latestVersion, updateUrl) = await GetUpdateInfo(currentVersion);
-		}
-		catch (HttpRequestException)
-		{
-			updateStatusLabel.Text = "Error!";
-			updateDetailsRichTextBox.Text = """
-				An error occured while checking for updates:
-				Failed to retrieve information from GitHub Releases.
-				Check your internet connection and try again later.
+			updateStatusLabel.Text = "Checking for updates...";
+			updateDetailsRichTextBox.Text = "Please wait... Fetching the latest data from the GitHub Releases API...";
+
+			try
+			{
+				(isUpdateAvailable, latestVersion, updateUrl) = await Updater.GetUpdateInfo();
+			}
+			catch (HttpRequestException)
+			{
+				updateStatusLabel.Text = "Error!";
+				updateDetailsRichTextBox.Text = """
+				An error occurred while checking for updates:
+				Failed to retrieve information from GitHub Releases. Check your internet connection and try again later.
 				""";
 
-			return;
-		}
-		catch (RateLimitExceededException)
-		{
-			updateStatusLabel.Text = "Error!";
-			updateDetailsRichTextBox.Text = """
-				An error occured while checking for updates:
+				return;
+			}
+			catch (RateLimitExceededException)
+			{
+				updateStatusLabel.Text = "Error!";
+				updateDetailsRichTextBox.Text = """
 				Whoa, slow down!
 				You have exceeded the rate limit and the GitHub API has temporarily blocked you.
-				Wait about an hour and try again.
+				Wait for a few hours and try again.
 				""";
 
-			return;
+				return;
+			}
+			catch (Exception ex)
+			{
+				string
+					exceptionMessage = ex.Message,
+					innerExceptionMessage = ex.InnerException?.Message ?? "[Not present.]",
+					exceptionDetails = ex.StackTrace ?? "[Not present.]",
+					innerExceptionDetails = ex.InnerException?.StackTrace ?? "[Not present.]";
+
+				updateStatusLabel.Text = "Error!";
+				updateDetailsRichTextBox.Text = $"""
+				An error occurred while checking for updates.
+
+				========== Details: ==========
+
+				Message (inner exception): {innerExceptionMessage}
+				Message: {exceptionMessage}
+				
+				----- Stack trace (inner exception): -----
+				{innerExceptionDetails}
+				
+				----- Stack trace: -----
+				{exceptionDetails}
+				""";
+
+				return;
+			}
 		}
 
 		if (isUpdateAvailable)
 		{
-			newVersionLabel.Text = $"Newer version available! (Version {latestVersion.ToString(3)})";
+			newVersionLabel.Text = $"Latest version: {latestVersion.ToString(3)})";
 
 			newVersionLabel.Enabled = true;
 			viewUpdateButton.Enabled = true;
@@ -105,7 +132,7 @@ public partial class UpdateCheckForm : Form
 			viewUpdateButton.Visible = true;
 
 			updateStatusLabel.Text = "An update is available!";
-			updateDetailsRichTextBox.Text = $"To view and download the {latestVersion.ToString(3)} update, press the \"View update\" button below.";
+			updateDetailsRichTextBox.Text = $"To learn more info about the new PWSandbox v{latestVersion.ToString(3)} and download it, press the \"View update\" button below.";
 		}
 		else
 		{
@@ -116,50 +143,9 @@ public partial class UpdateCheckForm : Form
 
 	private void ViewUpdate(object sender, EventArgs e)
 	{
-		if (updateUrl is null) return;
-		System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(updateUrl) { UseShellExecute = true });
-	}
+		if (updateInfo is null) return;
 
-	private static async Task<(bool isUpdateAvailable, Version latestVersion, string releaseUrl)> GetUpdateInfo(Version version)
-	{
-		GitHubClient githubClient = new(new ProductHeaderValue("PWSandbox", version.ToString(3)));
-
-		IReadOnlyList<Release> releases;
-
-		try
-		{
-			releases = await githubClient.Repository.Release.GetAll("PWSandbox", "PWSandbox");
-		}
-		catch (Exception)
-		{
-			throw;
-		}
-
-		Release latestRelease = releases[0];
-
-		if (!latestRelease.TagName.StartsWith('v'))
-			throw new FormatException("Tag name doesn't begin with \"v\"");
-
-		Version
-			fetchedVersion = Version.Parse(latestRelease.TagName.AsSpan(1)),
-
-			latestVersion = new(
-				fetchedVersion.Major,
-				fetchedVersion.Minor,
-				fetchedVersion.Build,
-				0
-			),
-
-			currentVersion = new(
-				version.Major,
-				version.Minor,
-				version.Build,
-				0
-			);
-
-		if (currentVersion.CompareTo(latestVersion) < 0) // if version on github is newer
-			return (true, latestVersion, latestRelease.HtmlUrl);
-		else
-			return (false, latestVersion, latestRelease.HtmlUrl);
+		string url = (((bool, Version, string))updateInfo).Item3;
+		Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
 	}
 }

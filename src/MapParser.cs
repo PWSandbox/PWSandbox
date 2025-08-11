@@ -4,16 +4,18 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 namespace PWSandbox;
 
-public enum MapVersion
+enum MapVersion
 {
 	V1_0,
-	V1_1 // Added '.' as alias to ' ' ("Void" object)
+	V1_1, // Added '.' as alias to ' ' ("Void" object)
+	V2_X // XML-based maps (not supported in this version)
 }
 
-public enum MapObject
+enum MapObject
 {
 	Unknown = -1, Void,
 	Player,
@@ -21,7 +23,7 @@ public enum MapObject
 	Wall, FakeWall, Barrier
 }
 
-public static class MapParser
+static class MapParser
 {
 	public static MapObject[,] ParseMapFromFile(string filePath, MapVersion? mapVersion = null)
 	{
@@ -45,7 +47,9 @@ public static class MapParser
 
 		if (mapVersion is null)
 		{
-			if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.0;", true, null))
+			if (IsXmlBasedMap(string.Join(Environment.NewLine, mapLines)))
+				mapVersion = MapVersion.V2_X;
+			else if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.0;", true, null))
 				mapVersion = MapVersion.V1_0;
 			else if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.1;", true, null))
 				mapVersion = MapVersion.V1_1;
@@ -58,6 +62,7 @@ public static class MapParser
 			{
 				MapVersion.V1_0 => ParseMapV1_0(mapLines),
 				MapVersion.V1_1 => ParseMapV1_1(mapLines),
+				MapVersion.V2_X => throw new NotSupportedException("XML-based maps are not supported in this version of PWSandbox"),
 				_ => throw new NotImplementedException()
 			};
 		}
@@ -67,15 +72,28 @@ public static class MapParser
 		}
 	}
 
+	private static bool IsXmlBasedMap(string mapText)
+	{
+		try
+		{
+			new XmlDocument().Load(mapText);
+			return true;
+		}
+		catch
+		{
+			return false;
+		}
+	}
+
 	#region Parsers
 
 	private static MapObject[,] ParseMapV1_0(string[] mapLines) => ParseMapV1_1(mapLines, true);
 
-	private static MapObject[,] ParseMapV1_1(string[] mapLines, bool legacyBehaviour = false)
+	private static MapObject[,] ParseMapV1_1(string[] mapLines, bool legacyBehavior = false)
 	{
 		for (int y = 0; y < 3; y++)
 		{
-			string mapHeader = legacyBehaviour ? "?PWSandbox-Map 1.0;" : "?PWSandbox-Map 1.1;";
+			string mapHeader = legacyBehavior ? "?PWSandbox-Map 1.0;" : "?PWSandbox-Map 1.1;";
 
 			mapLines = mapLines.Where(str => !string.IsNullOrWhiteSpace(str)).ToArray();
 
@@ -121,7 +139,7 @@ public static class MapParser
 				mapObjects[y, x] = mapLines[y][x] switch
 				{
 					' ' => MapObject.Void,
-					'.' when !legacyBehaviour => MapObject.Void,
+					'.' when !legacyBehavior => MapObject.Void,
 					'!' => MapObject.Player,
 					'=' => MapObject.Finish,
 					'@' => MapObject.Wall,

@@ -1,17 +1,18 @@
 // PWSandbox ( https://github.com/PWSandbox/PWSandbox )
 // Licensed under the MIT (Expat) license; Copyright (c) 2024-2025 yarb00
 
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace PWSandbox;
 
-public partial class AboutForm : Form
+partial class AboutForm : Form
 {
-	public AboutForm(MenuForm? menuForm = null)
+	public AboutForm(Theme colorTheme = Theme.SimpleDark)
 	{
 		InitializeComponent();
 
-		if (menuForm?.AppVersion is not null) appVersionLabel.Text = $"v{menuForm.AppVersion.ToString(3)}";
+		if (Program.Version is not null) appVersionLabel.Text = $"v{Program.Version.ToString(3)}";
 
 		appDescriptionRichTextBox.Text = """
 			Simple sandbox game, built with .NET and Windows Forms.
@@ -22,8 +23,6 @@ public partial class AboutForm : Form
 			""";
 
 		appLicenseRichTextBox.Text = """
-			Copyright (c) 2024-2025 yarb00
-
 			Permission is hereby granted, free of charge, to any person obtaining a copy
 			of this software and associated documentation files (the ""Software""), to deal
 			in the Software without restriction, including without limitation the rights
@@ -43,13 +42,10 @@ public partial class AboutForm : Form
 			SOFTWARE.
 			""";
 
-		SetTheme(menuForm?.CurrentColorTheme ?? Theme.SimpleDark);
+		SetTheme(colorTheme);
 	}
 
-	private void OnLinkClick(object sender, LinkClickedEventArgs e)
-	{
-		System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(e.LinkText!) { UseShellExecute = true });
-	}
+	private void OnLinkClick(object sender, LinkClickedEventArgs e) => Process.Start(new ProcessStartInfo(e.LinkText!) { UseShellExecute = true });
 
 	private void SetTheme(Theme colorTheme)
 	{
@@ -58,15 +54,16 @@ public partial class AboutForm : Form
 		BackColor = GuiColor[ControlColor.Background];
 		ForeColor = GuiColor[ControlColor.Foreground];
 
-		okButton.BackColor =
 		appDescriptionRichTextBox.BackColor =
 		appLicenseRichTextBox.BackColor =
-		GuiColor[ControlColor.ButtonBackground];
+		GuiColor[ControlColor.TextBoxBackground];
 
-		okButton.ForeColor =
 		appDescriptionRichTextBox.ForeColor =
 		appLicenseRichTextBox.ForeColor =
-		GuiColor[ControlColor.ButtonForeground];
+		GuiColor[ControlColor.TextBoxForeground];
+
+		okButton.BackColor = GuiColor[ControlColor.ButtonBackground];
+		okButton.ForeColor = GuiColor[ControlColor.ButtonForeground];
 
 		okButton.FlatAppearance.MouseOverBackColor = GuiColor[ControlColor.ButtonHovered];
 		okButton.FlatAppearance.MouseDownBackColor = GuiColor[ControlColor.ButtonClicked];

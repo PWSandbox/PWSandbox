@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace PWSandbox;
 
-public partial class PlayForm : Form
+partial class PlayForm : Form
 {
 	private readonly MapObject[,] mapObjects;
 
@@ -18,13 +18,13 @@ public partial class PlayForm : Form
 
 	private readonly Dictionary<MapObject, Color> ColorByMapObject = new()
 	{
-		{ MapObject.Unknown, Color.Magenta },
-		{ MapObject.Void, Color.Gray },
-		{ MapObject.Player, Color.Yellow },
-		{ MapObject.Finish, Color.Green },
-		{ MapObject.Wall, Color.Silver },
-		{ MapObject.FakeWall, Color.Silver }, // Same color as Wall
-		{ MapObject.Barrier, Color.Gray } // Same color as Void
+		[MapObject.Unknown] = Color.Magenta,
+		[MapObject.Void] = Color.Gray,
+		[MapObject.Player] = Color.Yellow,
+		[MapObject.Finish] = Color.Green,
+		[MapObject.Wall] = Color.Silver,
+		[MapObject.FakeWall] = Color.Silver, // Same color as Wall
+		[MapObject.Barrier] = Color.Gray // Same color as Void
 	};
 
 	public PlayForm(MapObject[,] mapObjects, Dictionary<MapObject, Color>? colorByMapObject = null)
@@ -133,19 +133,16 @@ public partial class PlayForm : Form
 
 	private bool IsCollision((int x, int y) coordinates)
 	{
-		bool isCollision = false;
-
 		try
 		{
-			if (mapObjects[coordinates.y, coordinates.x] == MapObject.Wall
-			|| mapObjects[coordinates.y, coordinates.x] == MapObject.Barrier)
-				isCollision = true;
+			if (mapObjects[coordinates.y, coordinates.x] is MapObject.Wall or MapObject.Barrier)
+				return true;
 		}
 		catch (IndexOutOfRangeException)
 		{
-			isCollision = true;
+			return true;
 		}
 
-		return isCollision;
+		return false;
 	}
 }

@@ -5,64 +5,84 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PWSandbox;
 
-public enum Theme
+enum Theme
 {
 	SimpleDark,
 	SimpleLight
 }
 
-public enum ControlColor
+enum ControlColor
 {
 	Background, Foreground,
+	TextBoxBackground, TextBoxForeground,
 	ButtonBackground, ButtonForeground,
 	ButtonHovered, ButtonClicked
 }
 
-public partial class MenuForm : Form
+partial class MenuForm : Form
 {
 	#region GUI colors
 
 	private static readonly Dictionary<ControlColor, Color> GuiColor_SimpleDark = new()
 	{
-		{ ControlColor.Background, Color.Black },
-		{ ControlColor.Foreground, Color.White },
-		{ ControlColor.ButtonBackground, Color.FromArgb(64, 64, 64) },
-		{ ControlColor.ButtonForeground, Color.White },
-		{ ControlColor.ButtonHovered, Color.Gray },
-		{ ControlColor.ButtonClicked, Color.DimGray }
+		[ControlColor.Background] = Color.Black,
+		[ControlColor.Foreground] = Color.White,
+		[ControlColor.TextBoxBackground] = Color.FromArgb(64, 64, 64),
+		[ControlColor.TextBoxForeground] = Color.White,
+		[ControlColor.ButtonBackground] = Color.FromArgb(64, 64, 64),
+		[ControlColor.ButtonForeground] = Color.White,
+		[ControlColor.ButtonHovered] = Color.Gray,
+		[ControlColor.ButtonClicked] = Color.DimGray
 	};
 
 	private static readonly Dictionary<ControlColor, Color> GuiColor_SimpleLight = new()
 	{
-		{ ControlColor.Background, Color.White },
-		{ ControlColor.Foreground, Color.Black },
-		{ ControlColor.ButtonBackground, Color.Silver },
-		{ ControlColor.ButtonForeground, Color.Black },
-		{ ControlColor.ButtonHovered, Color.Gray },
-		{ ControlColor.ButtonClicked, Color.FromArgb(64, 64, 64) }
+		[ControlColor.Background] = Color.White,
+		[ControlColor.Foreground] = Color.Black,
+		[ControlColor.TextBoxBackground] = Color.Silver,
+		[ControlColor.TextBoxForeground] = Color.Black,
+		[ControlColor.ButtonBackground] = Color.Silver,
+		[ControlColor.ButtonForeground] = Color.Black,
+		[ControlColor.ButtonHovered] = Color.Gray,
+		[ControlColor.ButtonClicked] = Color.FromArgb(64, 64, 64)
 	};
 
 	public static readonly Dictionary<Theme, Dictionary<ControlColor, Color>> GuiColor = new()
 	{
-		{ Theme.SimpleDark, GuiColor_SimpleDark },
-		{ Theme.SimpleLight, GuiColor_SimpleLight }
+		[Theme.SimpleDark] = GuiColor_SimpleDark,
+		[Theme.SimpleLight] = GuiColor_SimpleLight
 	};
 
 	#endregion
 
-	public Theme CurrentColorTheme { get; private set; } = Theme.SimpleDark;
-	public readonly Version? AppVersion;
+	private static Theme currentColorTheme = Theme.SimpleDark;
 
 	public MenuForm()
 	{
 		InitializeComponent();
 
-		AppVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-		if (AppVersion is not null) Text += $" v{AppVersion.ToString(3)}";
+		if (Program.Version is not null) Text += $" v{Program.Version.ToString(3)}";
+
+		Task.Run(static async () =>
+		{
+			(bool isUpdateAvailable, Version latestVersion, string releaseUrl) updateInfo;
+
+			try
+			{
+				updateInfo = await Updater.GetUpdateInfo();
+			}
+			catch
+			{
+				return;
+			}
+
+			if (updateInfo.isUpdateAvailable) new UpdateCheckForm(updateInfo).ShowDialog();
+		});
 	}
 
 	#region Map loading
@@ -70,7 +90,7 @@ public partial class MenuForm : Form
 	private void LoadMapFile(object sender, EventArgs e)
 	{
 		if (mapOpenFileDialog.ShowDialog() == DialogResult.Cancel) return;
-		(PlayForm? playForm, string? errorText) = GetLoadedPlayForm(mapOpenFileDialog.FileName, CurrentColorTheme);
+		(PlayForm? playForm, string? errorText) = GetLoadedPlayForm(mapOpenFileDialog.FileName, currentColorTheme);
 
 		if (errorText is not null) MessageBox.Show(
 			errorText,
@@ -101,6 +121,18 @@ public partial class MenuForm : Form
 		{
 			return (null, "The file you selected is empty and does not contain a valid PWSandbox map.");
 		}
+		catch (NotSupportedException ex) when (ex.Message.Contains("XML"))
+		{
+			return (null, $"""
+				The map you are trying to open is made using the new XML based standard (2.x).
+
+				You are running the legacy (WinForms based) version of PWSandbox,
+				which doesn't support the new map standard.
+
+				To be able to run the new XML-based maps, and receive new features and bug fixes,
+				please upgrade to the latest cross platform version of PWSandbox.
+				""");
+		}
 		catch (Exception ex) when (ex is FormatException or NotSupportedException)
 		{
 			return (null, $"""
@@ -122,7 +154,8 @@ public partial class MenuForm : Form
 				{ MapObject.Wall, Color.FromArgb(64, 64, 64) },
 				{ MapObject.FakeWall, Color.FromArgb(64, 64, 64) }, // Same color as Wall
 			},
-			_ => null
+			Theme.SimpleLight => null,
+			_ => throw new NotImplementedException()
 		};
 
 		return (new PlayForm(mapObjects, colors), null);
@@ -132,33 +165,33 @@ public partial class MenuForm : Form
 
 	private void SwitchTheme(object sender, EventArgs e)
 	{
-		CurrentColorTheme = CurrentColorTheme switch
+		currentColorTheme = currentColorTheme switch
 		{
 			Theme.SimpleLight => Theme.SimpleDark,
 			Theme.SimpleDark => Theme.SimpleLight,
 			_ => throw new NotImplementedException()
 		};
 
-		BackColor = GuiColor[CurrentColorTheme][ControlColor.Background];
-		ForeColor = GuiColor[CurrentColorTheme][ControlColor.Foreground];
+		SetTheme(currentColorTheme);
+	}
+
+	private void SetTheme(Theme colorTheme)
+	{
+		var GuiColor = MenuForm.GuiColor[colorTheme];
+
+		BackColor = GuiColor[ControlColor.Background];
+		ForeColor = GuiColor[ControlColor.Foreground];
 		foreach (Control control in Controls)
 		{
 			if (control is not Button button) continue;
 
-			button.BackColor = GuiColor[CurrentColorTheme][ControlColor.ButtonBackground];
-			button.ForeColor = GuiColor[CurrentColorTheme][ControlColor.ButtonForeground];
-			button.FlatAppearance.MouseOverBackColor = GuiColor[CurrentColorTheme][ControlColor.ButtonHovered];
-			button.FlatAppearance.MouseDownBackColor = GuiColor[CurrentColorTheme][ControlColor.ButtonClicked];
+			button.BackColor = GuiColor[ControlColor.ButtonBackground];
+			button.ForeColor = GuiColor[ControlColor.ButtonForeground];
+			button.FlatAppearance.MouseOverBackColor = GuiColor[ControlColor.ButtonHovered];
+			button.FlatAppearance.MouseDownBackColor = GuiColor[ControlColor.ButtonClicked];
 		}
 	}
 
-	private void OpenAboutAppDialog(object sender, EventArgs e)
-	{
-		new AboutForm(this).ShowDialog();
-	}
-
-	private void CheckForUpdates(object sender, EventArgs e)
-	{
-		new UpdateCheckForm(this).ShowDialog();
-	}
+	private void OpenAboutAppDialog(object sender, EventArgs e) => new AboutForm(currentColorTheme).ShowDialog();
+	private void CheckForUpdates(object sender, EventArgs e) => new UpdateCheckForm(null, currentColorTheme).ShowDialog();
 }
