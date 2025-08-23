@@ -12,7 +12,8 @@ namespace PWSandbox;
 
 static class Updater
 {
-	private const string jsonUpdateInfoLocation = "https://gist.githubusercontent.com/yarb00/78c17da868cb352e50eb1639776eedbb/raw/e1856629de515308d3d1375847c34993af60a2d5/winforms.pws-update-data.json";
+	private const string mainJsonUpdateInfoLocation = "https://pws.yarb00.dev/update/data/client/winforms.pws-update-data.json";
+	private const string backupJsonUpdateInfoLocation = "https://gist.githubusercontent.com/yarb00/78c17da868cb352e50eb1639776eedbb/raw/winforms.pws-update-data.json";
 	private const long githubRepositoryID = 906638888;
 
 	private static readonly Version? currentVersion = Program.Version;
@@ -64,6 +65,12 @@ static class Updater
 
 		try
 		{
+			return await GetLatestVersion_Json(backupJsonUpdateInfoLocation);
+		}
+		catch { }
+
+		try
+		{
 			return await GetLatestVersion_GitHub();
 		}
 		catch { }
@@ -83,7 +90,7 @@ static class Updater
 		throw new Exception("All ways of update checking failed");
 	}
 
-	private static async Task<(Version fetchedVersion, string updateUrl)> GetLatestVersion_Json(string jsonLocation = jsonUpdateInfoLocation)
+	private static async Task<(Version fetchedVersion, string updateUrl)> GetLatestVersion_Json(string jsonLocation = mainJsonUpdateInfoLocation)
 	{
 		using HttpClient http = new();
 		using HttpResponseMessage response = await http.GetAsync(jsonLocation);
