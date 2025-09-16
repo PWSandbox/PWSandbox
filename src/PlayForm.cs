@@ -15,6 +15,7 @@ partial class PlayForm : Form
 	private (int x, int y)? playerPosition = null, lastFinish = null;
 
 	private const int cellSize = 20;
+	private const int baseDpi = 96;
 
 	private readonly Dictionary<MapObject, Color> ColorByMapObject = new()
 	{
@@ -120,8 +121,10 @@ partial class PlayForm : Form
 		DrawCell(graphics, ((int x, int y))playerPosition, cellSize, ColorByMapObject[MapObject.Player]);
 	}
 
-	private static void DrawCell(Graphics graphics, (int x, int y) coordinates, int cellSize, Color color)
+	private void DrawCell(Graphics graphics, (int x, int y) coordinates, int cellSize, Color color)
 	{
+		cellSize *= DeviceDpi / baseDpi;
+
 		using SolidBrush brush = new(color);
 
 		graphics.FillRectangle(

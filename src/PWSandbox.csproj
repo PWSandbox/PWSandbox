@@ -9,6 +9,12 @@
     <PublishSingleFile>true</PublishSingleFile>
     <VersionPrefix>1.5.0</VersionPrefix>
     <UseWindowsForms>true</UseWindowsForms>
+
+    <ApplicationVisualStyles>true</ApplicationVisualStyles>
+    <ApplicationUseCompatibleTextRendering>false</ApplicationUseCompatibleTextRendering>
+    <ApplicationDefaultFont>Consolas, 9pt, style=regular</ApplicationDefaultFont>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
   </PropertyGroup>
 
   <ItemGroup>

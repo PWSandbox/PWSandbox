@@ -26,8 +26,7 @@ static class Program
 			Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
 		}
 
-		Application.EnableVisualStyles();
-		Application.SetDefaultFont(new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point, 0));
+		ApplicationConfiguration.Initialize();
 
 		if (args.Length == 0) Application.Run(new MenuForm());
 		else Application.Run(new CommandLineArgumentsApplicationContext(args));
