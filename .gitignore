@@ -683,5 +683,5 @@ fabric.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/dotnetcore,csharp,visualstudio,visualstudiocode,rider
 
-**/bin
-**/obj
+**/bin/
+**/obj/

@@ -1,166 +1,79 @@
-// PWSandbox ( https://github.com/PWSandbox/PWSandbox )
-// Licensed under the MIT (Expat) license; Copyright (c) 2024-2025 yarb00
+// https://pws.yarb00.dev
 
-using Octokit;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace PWSandbox;
 
-static class Updater
+internal readonly record struct UpdateData(Version? LatestVersion, Uri? DetailsUrl);
+
+internal static class Updater
 {
-	private const string mainJsonUpdateInfoLocation = "https://pws.yarb00.dev/update/data/client/winforms.pws-update-data.json";
-	private const string backupJsonUpdateInfoLocation = "https://gist.githubusercontent.com/yarb00/78c17da868cb352e50eb1639776eedbb/raw/winforms.pws-update-data.json";
-	private const long githubRepositoryID = 906638888;
+	private const string updateDataLocation = $"{Program.Website}/update/data/client/winforms.pws-update-data.json";
 
-	private static readonly Version? currentVersion = Program.Version;
+	public static bool? IsUpdateAvailable(UpdateData updateData) => updateData.LatestVersion is null ? null : IsUpdateAvailable(updateData.LatestVersion, Program.Version);
 
-	public static async Task<(bool isUpdateAvailable, Version latestVersion, string releaseUrl)> GetUpdateInfo()
+	public static bool IsUpdateAvailable(Version latestVersion, Version installedVersion) =>
+		// Trim the 4th section of Version, since PWSandbox versions are in the A.B.C format
+		new Version(latestVersion.Major, latestVersion.Minor, latestVersion.Build) > new Version(installedVersion.Major, installedVersion.Minor, installedVersion.Build);
+
+	public static async Task<UpdateData> GetUpdateData()
 	{
-		if (currentVersion is null) throw new NullReferenceException("App version is null; update checking is not possible");
+		using HttpClient httpClient = new();
+		httpClient.DefaultRequestHeaders.UserAgent.Add(new("PWSandbox", Program.FriendlyVersion));
 
-		Version fetchedVersion;
-		string updateUrl;
-
+		string rawUpdateData;
 		try
 		{
-			(fetchedVersion, updateUrl) = await GetLatestVersion();
+			rawUpdateData = await httpClient.GetStringAsync(updateDataLocation);
 		}
 		catch
 		{
 			throw;
 		}
 
-		Version
-			latestVersionTrimmed = new(
-				fetchedVersion.Major,
-				fetchedVersion.Minor,
-				fetchedVersion.Build,
-				0
-			),
-
-			currentVersionTrimmed = new(
-				currentVersion.Major,
-				currentVersion.Minor,
-				currentVersion.Build,
-				0
-			);
-
-		if (currentVersionTrimmed.CompareTo(latestVersionTrimmed) < 0) // If the latest version is newer
-			return (true, latestVersionTrimmed, updateUrl);
-		else
-			return (false, latestVersionTrimmed, updateUrl);
-	}
-
-	private static async Task<(Version fetchedVersion, string updateUrl)> GetLatestVersion()
-	{
+		JsonElement updateData;
 		try
 		{
-			return await GetLatestVersion_Json();
-		}
-		catch { }
-
-		try
-		{
-			return await GetLatestVersion_Json(backupJsonUpdateInfoLocation);
-		}
-		catch { }
-
-		try
-		{
-			return await GetLatestVersion_GitHub();
-		}
-		catch { }
-
-		try
-		{
-			return await GetLatestVersion_GitHub("PWSandbox");
-		}
-		catch { }
-
-		try
-		{
-			return await GetLatestVersion_GitHub("yarb00");
-		}
-		catch { }
-
-		throw new Exception("All ways of update checking failed");
-	}
-
-	private static async Task<(Version fetchedVersion, string updateUrl)> GetLatestVersion_Json(string jsonLocation = mainJsonUpdateInfoLocation)
-	{
-		using HttpClient http = new();
-		using HttpResponseMessage response = await http.GetAsync(jsonLocation);
-		using JsonDocument json = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
-
-		JsonElement root = json.RootElement;
-		string latestBranchVersion = root.GetProperty("latest_branch_version").GetRawText();
-		string latestBranchVersionInfo = root.GetProperty("latest_branch_version_info").GetRawText();
-
-		Version fetchedVersion = Version.Parse(latestBranchVersion);
-
-		return (fetchedVersion, latestBranchVersionInfo);
-	}
-
-	private static async Task<(Version fetchedVersion, string updateUrl)> GetLatestVersion_GitHub(long repositoryID = githubRepositoryID)
-	{
-		GitHubClient githubClient = GetLatestVersion_GitHub_SetupClient();
-
-		IReadOnlyList<Release> releases;
-
-		try
-		{
-			releases = await githubClient.Repository.Release.GetAll(repositoryID);
+			updateData = JsonDocument.Parse(rawUpdateData, new JsonDocumentOptions
+			{
+				AllowTrailingCommas = true,
+				CommentHandling = JsonCommentHandling.Skip
+			}).RootElement;
 		}
 		catch
 		{
 			throw;
 		}
 
-		return GetLatestVersion_GitHub_FromReleasesList(releases);
-	}
-
-	private static async Task<(Version fetchedVersion, string updateUrl)> GetLatestVersion_GitHub(string author, string name = "PWSandbox")
-	{
-		GitHubClient githubClient = GetLatestVersion_GitHub_SetupClient();
-
-		IReadOnlyList<Release> releases;
-
-		try
+		return new UpdateData
 		{
-			releases = await githubClient.Repository.Release.GetAll(author, name);
-		}
-		catch
-		{
-			throw;
-		}
-
-		return GetLatestVersion_GitHub_FromReleasesList(releases);
+			LatestVersion = GetLatestVersion(updateData),
+			DetailsUrl = GetDetailsUrl(updateData)
+		};
 	}
 
-	#region GitHub-specific
-
-	private static GitHubClient GetLatestVersion_GitHub_SetupClient()
+	private static Version? GetLatestVersion(JsonElement updateData)
 	{
-		if (currentVersion is null) throw new NullReferenceException("App version is null; update checking is not possible");
+		if (!updateData.TryGetProperty("latest_branch_version", out JsonElement latestBranchVersionElement)) return null;
 
-		return new(new ProductHeaderValue("PWSandbox", currentVersion.ToString(3)));
+		string? rawLatestVersion = latestBranchVersionElement.GetString();
+
+		_ = Version.TryParse(rawLatestVersion, out Version? latestVersion);
+
+		return latestVersion;
 	}
 
-	private static (Version fetchedVersion, string updateUrl) GetLatestVersion_GitHub_FromReleasesList(IReadOnlyList<Release> list)
+	private static Uri? GetDetailsUrl(JsonElement updateData)
 	{
-		Release latestRelease = list[0];
+		if (!updateData.TryGetProperty("latest_branch_version_info", out JsonElement latestBranchVersionInfoElement)) return null;
 
-		if (!latestRelease.TagName.StartsWith('v'))
-			throw new FormatException("Tag name doesn't begin with \"v\"");
+		string? rawDetailsUrl = latestBranchVersionInfoElement.GetString();
 
-		Version fetchedVersion = Version.Parse(latestRelease.TagName.AsSpan(1));
+		_ = Uri.TryCreate(rawDetailsUrl, new UriCreationOptions(), out Uri? detailsUrl);
 
-		return (fetchedVersion, latestRelease.HtmlUrl);
+		return detailsUrl;
 	}
-
-	#endregion
 }

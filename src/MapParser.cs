@@ -1,21 +1,21 @@
-// PWSandbox ( https://github.com/PWSandbox/PWSandbox )
-// Licensed under the MIT (Expat) license; Copyright (c) 2024-2025 yarb00
+// https://pws.yarb00.dev
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml;
 
 namespace PWSandbox;
 
-enum MapVersion
+internal enum MapVersion
 {
 	V1_0,
-	V1_1, // Added '.' as alias to ' ' ("Void" object)
-	V2_X // XML-based maps (not supported in this version)
+	V1_1, // Added '.' as alias to ' ' (the "Void" object)
+	V2_X // XML-based maps (not supported)
 }
 
-enum MapObject
+internal enum MapObject
 {
 	Unknown = -1, Void,
 	Player,
@@ -23,7 +23,7 @@ enum MapObject
 	Wall, FakeWall, Barrier
 }
 
-static class MapParser
+internal static class MapParser
 {
 	public static MapObject[,] ParseMapFromFile(string filePath, MapVersion? mapVersion = null)
 	{
@@ -33,7 +33,7 @@ static class MapParser
 		}
 		catch (ArgumentException e) when (e.ParamName == "mapLines")
 		{
-			throw new FileFormatException("Provided file is empty", e);
+			throw new FileFormatException("Provided file is empty.", e);
 		}
 		catch
 		{
@@ -43,7 +43,7 @@ static class MapParser
 
 	public static MapObject[,] ParseMapFromStringArray(string[] mapLines, MapVersion? mapVersion = null)
 	{
-		if (mapLines.Length == 0) throw new ArgumentException("Map cannot be empty", nameof(mapLines));
+		if (mapLines.Length == 0) throw new ArgumentException("Map cannot be empty.", nameof(mapLines));
 
 		if (mapVersion is null)
 		{
@@ -53,7 +53,7 @@ static class MapParser
 				mapVersion = MapVersion.V1_0;
 			else if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.1;", true, null))
 				mapVersion = MapVersion.V1_1;
-			else throw new NotSupportedException("Failed to detect map version");
+			else throw new NotSupportedException("Failed to detect map version.");
 		}
 
 		try
@@ -62,8 +62,8 @@ static class MapParser
 			{
 				MapVersion.V1_0 => ParseMapV1_0(mapLines),
 				MapVersion.V1_1 => ParseMapV1_1(mapLines),
-				MapVersion.V2_X => throw new NotSupportedException("XML-based maps are not supported in this version of PWSandbox"),
-				_ => throw new NotImplementedException()
+				MapVersion.V2_X => throw new NotSupportedException("XML-based maps are not supported in this version of PWSandbox."),
+				_ => throw new UnreachableException()
 			};
 		}
 		catch
@@ -95,35 +95,35 @@ static class MapParser
 		{
 			string mapHeader = legacyBehavior ? "?PWSandbox-Map 1.0;" : "?PWSandbox-Map 1.1;";
 
-			mapLines = mapLines.Where(str => !string.IsNullOrWhiteSpace(str)).ToArray();
+			mapLines = mapLines.Where(static str => !string.IsNullOrWhiteSpace(str)).ToArray();
 
 			switch (y)
 			{
 				case 0:
 					if (mapLines[0].TrimStart().StartsWith(mapHeader, true, null))
 					{
-						mapLines[0] = mapLines[0].TrimStart().Remove(0, mapHeader.Length);
+						mapLines[0] = mapLines[0].TrimStart()[mapHeader.Length..];
 						continue;
 					}
-					else throw new FormatException($"Map header with supported version of standard was not found");
+					else throw new FormatException($"Map header with a supported version of standard was not found.");
 
 				case 1:
 					if (mapLines[0].TrimStart().StartsWith("(map: begin)", true, null))
 					{
-						mapLines[0] = mapLines[0].TrimStart().Remove(0, "(map: begin)".Length);
+						mapLines[0] = mapLines[0].TrimStart()["(map: begin)".Length..];
 						continue;
 					}
-					else throw new FormatException($"Expected \"(map: begin)\" block after map header (\"?{mapHeader}\"), but it was not found");
+					else throw new FormatException($"Expected \"(map: begin)\" block after the map header (\"{mapHeader}\"), but it was not found.");
 
 				case 2:
 					if (mapLines[^1].TrimEnd().EndsWith("(map: end)", true, null))
 					{
 						mapLines[^1] = mapLines[^1].TrimEnd().Remove(mapLines[^1].Length - "(map: end)".Length, "(map: end)".Length);
-						mapLines = mapLines.Where(str => !string.IsNullOrWhiteSpace(str)).ToArray();
+						mapLines = mapLines.Where(static str => !string.IsNullOrWhiteSpace(str)).ToArray();
 
 						break;
 					}
-					else throw new FormatException($"Expected \"(map: end)\" block in the end of map, but it was not found");
+					else throw new FormatException("Expected \"(map: end)\" block in the end of the map, but it was not found.");
 			}
 		}
 

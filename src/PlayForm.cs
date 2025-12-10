@@ -1,5 +1,4 @@
-// PWSandbox ( https://github.com/PWSandbox/PWSandbox )
-// Licensed under the MIT (Expat) license; Copyright (c) 2024-2025 yarb00
+// https://pws.yarb00.dev
 
 using System;
 using System.Collections.Generic;
@@ -8,14 +7,16 @@ using System.Windows.Forms;
 
 namespace PWSandbox;
 
-partial class PlayForm : Form
+internal partial class PlayForm : Form
 {
+	private const int baseDpi = 96;
+	private const int baseCellSize = 26;
+
+	private int CellSize => (int)float.Ceiling(baseCellSize * ((float)DeviceDpi / baseDpi));
+
 	private readonly MapObject[,] mapObjects;
 
 	private (int x, int y)? playerPosition = null, lastFinish = null;
-
-	private const int cellSize = 20;
-	private const int baseDpi = 96;
 
 	private readonly Dictionary<MapObject, Color> ColorByMapObject = new()
 	{
@@ -34,7 +35,7 @@ partial class PlayForm : Form
 
 		this.mapObjects = mapObjects;
 
-		ClientSize = new Size(mapObjects.GetLength(1) * cellSize, mapObjects.GetLength(0) * cellSize);
+		ClientSize = new Size(mapObjects.GetLength(1) * CellSize, mapObjects.GetLength(0) * CellSize);
 
 		if (colorByMapObject is null) return;
 
@@ -93,7 +94,7 @@ partial class PlayForm : Form
 				{
 					case MapObject.Player:
 						playerPosition ??= (x, y);
-						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Void]);
+						DrawCell(graphics, (x, y), CellSize, ColorByMapObject[MapObject.Void]);
 						break;
 
 					case MapObject.Finish:
@@ -109,22 +110,20 @@ partial class PlayForm : Form
 
 							lastFinish = playerPosition;
 						}
-						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Finish]);
+						DrawCell(graphics, (x, y), CellSize, ColorByMapObject[MapObject.Finish]);
 						break;
 
 					default:
-						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[mapObjects[y, x]]);
+						DrawCell(graphics, (x, y), CellSize, ColorByMapObject[mapObjects[y, x]]);
 						break;
 				}
 
 		if (playerPosition is null) return;
-		DrawCell(graphics, ((int x, int y))playerPosition, cellSize, ColorByMapObject[MapObject.Player]);
+		DrawCell(graphics, ((int x, int y))playerPosition, CellSize, ColorByMapObject[MapObject.Player]);
 	}
 
-	private void DrawCell(Graphics graphics, (int x, int y) coordinates, int cellSize, Color color)
+	private static void DrawCell(Graphics graphics, (int x, int y) coordinates, int cellSize, Color color)
 	{
-		cellSize *= DeviceDpi / baseDpi;
-
 		using SolidBrush brush = new(color);
 
 		graphics.FillRectangle(

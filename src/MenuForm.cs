@@ -1,22 +1,20 @@
-// PWSandbox ( https://github.com/PWSandbox/PWSandbox )
-// Licensed under the MIT (Expat) license; Copyright (c) 2024-2025 yarb00
+// https://pws.yarb00.dev
 
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PWSandbox;
 
-enum Theme
+internal enum Theme
 {
 	SimpleDark,
 	SimpleLight
 }
 
-enum ControlColor
+internal enum ControlColor
 {
 	Background, Foreground,
 	TextBoxBackground, TextBoxForeground,
@@ -24,7 +22,7 @@ enum ControlColor
 	ButtonHovered, ButtonClicked
 }
 
-partial class MenuForm : Form
+internal partial class MenuForm : Form
 {
 	#region GUI colors
 
@@ -67,22 +65,6 @@ partial class MenuForm : Form
 		InitializeComponent();
 
 		if (Program.Version is not null) Text += $" v{Program.Version.ToString(3)}";
-
-		Task.Run(static async () =>
-		{
-			(bool isUpdateAvailable, Version latestVersion, string releaseUrl) updateInfo;
-
-			try
-			{
-				updateInfo = await Updater.GetUpdateInfo();
-			}
-			catch
-			{
-				return;
-			}
-
-			if (updateInfo.isUpdateAvailable) new UpdateCheckForm(updateInfo).ShowDialog();
-		});
 	}
 
 	#region Map loading

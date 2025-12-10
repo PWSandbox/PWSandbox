@@ -1,44 +1,100 @@
-// PWSandbox ( https://github.com/PWSandbox/PWSandbox )
-// Licensed under the MIT (Expat) license; Copyright (c) 2024-2025 yarb00
+// https://pws.yarb00.dev
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.Reflection;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PWSandbox;
 
-static class Program
+internal static class Program
 {
-	public static readonly Version? Version = Assembly.GetExecutingAssembly().GetName().Version;
+	public const string Website = "https://pws.yarb00.dev";
+
+	public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version ?? throw new UnreachableException("Assembly version can't be null.");
+	public static readonly string FriendlyVersion = Version.ToString(3);
 
 	[STAThread]
 	public static void Main(string[] args)
 	{
 		if (!Debugger.IsAttached)
 		{
-			AppDomain.CurrentDomain.UnhandledException += HandleUnhandledException;
+			AppDomain.CurrentDomain.UnhandledException += static (_, e) => HandleUnhandledException(e.ExceptionObject as Exception);
+			TaskScheduler.UnobservedTaskException += static (_, e) => HandleUnhandledException(e.Exception);
 
-			Application.ThreadException += HandleUnhandledException;
+			Application.ThreadException += static (_, e) => HandleUnhandledException(e.Exception, true);
 			Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
 		}
 
 		ApplicationConfiguration.Initialize();
 
 		if (args.Length == 0) Application.Run(new MenuForm());
-		else Application.Run(new CommandLineArgumentsApplicationContext(args));
+		else Application.Run(new ArgumentsApplicationContext(args));
 	}
 
-	class CommandLineArgumentsApplicationContext : ApplicationContext
+	private static void HandleUnhandledException(Exception? e, bool isResumingAllowed = false)
+	{
+		const string
+			baseText = $"""
+				An unhandled exception occurred!
+				It's a serious error that should not normally happen.
+
+				<a href="{Website}/issue/report/client">Report this bug here</a>.
+				""",
+			resumingNotAllowedText = $"""
+				{baseText}
+
+				You can press the "Close" button below to exit PWSandbox.
+				""",
+			resumingAllowedText = $"""
+				{baseText}
+
+				You can either
+				- press the "Close" button below to exit PWSandbox
+				- or press the "Continue" button below to try ignore this error (stability is not guaranteed!).
+				""";
+
+		TaskDialogButtonCollection buttons = [TaskDialogButton.Close];
+		if (isResumingAllowed) buttons.Add(TaskDialogButton.Continue);
+
+		TaskDialogPage unhandledExceptionDialog = new()
+		{
+			Caption = "PWSandbox: Unhandled exception",
+			Heading = "ouch x_x",
+			Icon = TaskDialogIcon.ShieldErrorRedBar,
+			SizeToContent = true,
+			EnableLinks = true,
+
+			Buttons = buttons,
+
+			Expander = new TaskDialogExpander
+			{
+				CollapsedButtonText = "Show details",
+				ExpandedButtonText = "Hide details",
+				Text = $"""
+					===== Details: =====
+					{e?.ToString() ?? "[Details are not available.]"}
+					"""
+			},
+
+			Text = isResumingAllowed ? resumingAllowedText : resumingNotAllowedText
+		};
+
+		unhandledExceptionDialog.LinkClicked += (_, e) => Process.Start(new ProcessStartInfo(e.LinkHref) { UseShellExecute = true });
+
+		TaskDialogButton result = TaskDialog.ShowDialog(unhandledExceptionDialog);
+		if (result == TaskDialogButton.Close) Environment.FailFast("An unhandled exception occurred.", e);
+	}
+
+	private class ArgumentsApplicationContext : ApplicationContext
 	{
 		private int openForms = 0;
 
-		internal CommandLineArgumentsApplicationContext(string[] filePaths)
+		public ArgumentsApplicationContext(string[] filePaths)
 		{
-			int totalForms = filePaths.Length, successForms = 0, errorForms = 0;
+			int totalMaps = filePaths.Length, successfulMaps = 0, failedMaps = 0;
 			List<string> results = [];
 
 			foreach (string filePath in filePaths)
@@ -47,7 +103,7 @@ static class Program
 
 				if (errorText is not null)
 				{
-					errorForms++;
+					failedMaps++;
 					results.Add($"""
 						Map "{filePath}"
 						could not load because of an error:
@@ -57,11 +113,11 @@ static class Program
 
 				if (playForm is not null)
 				{
-					playForm.Closed += OnFormClosed;
+					playForm.FormClosed += (_, _) => OnFormClosed();
 					playForm.Show();
 					openForms++;
 
-					successForms++;
+					successfulMaps++;
 					results.Add($"""
 						Map "{filePath}"
 						loaded successfully.
@@ -69,10 +125,10 @@ static class Program
 				}
 			}
 
-			TaskDialogPage resultsDialog = new()
+			TaskDialog.ShowDialog(new()
 			{
-				Caption = "PWSandbox: Loading results",
-				Heading = "Loading results",
+				Caption = "PWSandbox: Results",
+				Heading = "Results",
 				Icon = TaskDialogIcon.Information,
 				SizeToContent = true,
 
@@ -84,108 +140,22 @@ static class Program
 					ExpandedButtonText = "Hide details",
 					Text = $"""
 						===== Details: =====
-
 						{string.Join(Environment.NewLine + Environment.NewLine, results)}
 						"""
-
 				},
 
 				Text = $"""
-					Tried to load {totalForms} maps.
-					{successForms} of them loaded successfully,
-					{errorForms} with errors.
+					Tried to load {totalMaps} maps.
+					{successfulMaps} of them loaded successfully,
+					{failedMaps} with errors.
 					"""
-			};
-			TaskDialog.ShowDialog(resultsDialog);
+			});
 		}
 
-		private void OnFormClosed(object? sender, EventArgs e)
+		private void OnFormClosed()
 		{
-			if (--openForms == 0) ExitThread();
+			openForms--;
+			if (openForms == 0) ExitThread();
 		}
 	}
-
-	#region Handling of unhandled exceptions
-
-	private static void HandleUnhandledException(object sender, UnhandledExceptionEventArgs e)
-		=> HandleUnhandledException((Exception)e.ExceptionObject);
-
-	private static void HandleUnhandledException(object sender, ThreadExceptionEventArgs e)
-		=> HandleUnhandledException(e.Exception, true);
-
-	private static void HandleUnhandledException(Exception e, bool isResumingAllowed = false)
-	{
-		const string
-			baseText = $"""
-				An unhandled exception occurred!
-				It's a serious error that should not normally happen.
-
-				NOTE: Please do not report this issue to the PWSandbox GitHub.
-				The version you are using is legacy and is not supported anymore.
-				To receive updates, new features and bug fixes, migrate to the latest version of PWSandbox.
-				For more details, visit <a href="https://github.com/PWSandbox/PWSandbox">PWSandbox GitHub</a>.
-				""",
-			resumingNotAllowedText = $"""
-				{baseText}
-
-				Now press the "Close" button below to exit PWSandbox.
-				""",
-			resumingAllowedText = $"""
-				{baseText}
-
-				Now you can either
-				- press the "Close" button below to exit PWSandbox
-				- or press the "Continue" button below to ignore the error
-				and try to return to PWSandbox (stability is not guaranteed!).
-				""";
-
-		string
-			exceptionMessage = e.Message,
-			innerExceptionMessage = e.InnerException?.Message ?? "[Not present.]",
-			exceptionDetails = e.StackTrace ?? "[Not present.]",
-			innerExceptionDetails = e.InnerException?.StackTrace ?? "[Not present.]";
-
-		TaskDialogButtonCollection unhandledExceptionDialogButtons = [TaskDialogButton.Close];
-		if (isResumingAllowed) unhandledExceptionDialogButtons.Add(TaskDialogButton.Continue);
-
-		TaskDialogPage unhandledExceptionDialog = new()
-		{
-			Caption = "Critical error! | PWSandbox",
-			Heading = "ouch x_x",
-			Icon = TaskDialogIcon.ShieldErrorRedBar,
-			SizeToContent = true,
-			EnableLinks = true,
-
-			Buttons = unhandledExceptionDialogButtons,
-
-			Expander = new TaskDialogExpander
-			{
-				CollapsedButtonText = "Show details",
-				ExpandedButtonText = "Hide details",
-				Text = $"""
-					========== Details: ==========
-
-					Message (inner exception): {innerExceptionMessage}
-					Message: {exceptionMessage}
-
-					----- Stack trace (inner exception): -----
-					{innerExceptionDetails}
-
-					----- Stack trace: -----
-					{exceptionDetails}
-					"""
-			},
-
-			Text = isResumingAllowed ? resumingAllowedText : resumingNotAllowedText
-		};
-
-		unhandledExceptionDialog.LinkClicked += (s, e) => Process.Start(
-			new ProcessStartInfo(e.LinkHref) { UseShellExecute = true }
-		);
-
-		TaskDialogButton result = TaskDialog.ShowDialog(unhandledExceptionDialog);
-		if (result == TaskDialogButton.Close) Application.Exit();
-	}
-
-	#endregion
 }

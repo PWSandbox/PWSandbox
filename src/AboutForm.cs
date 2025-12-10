@@ -1,12 +1,11 @@
-// PWSandbox ( https://github.com/PWSandbox/PWSandbox )
-// Licensed under the MIT (Expat) license; Copyright (c) 2024-2025 yarb00
+// https://pws.yarb00.dev
 
 using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace PWSandbox;
 
-partial class AboutForm : Form
+internal partial class AboutForm : Form
 {
 	public AboutForm(Theme colorTheme = Theme.SimpleDark)
 	{

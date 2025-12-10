@@ -1,7 +1,5 @@
-// PWSandbox ( https://github.com/PWSandbox/PWSandbox )
-// Licensed under the MIT (Expat) license; Copyright (c) 2024-2025 yarb00
+// https://pws.yarb00.dev
 
-using Octokit;
 using System;
 using System.Diagnostics;
 using System.Net.Http;
@@ -9,7 +7,7 @@ using System.Windows.Forms;
 
 namespace PWSandbox;
 
-partial class UpdateCheckForm : Form
+internal partial class UpdateCheckForm : Form
 {
 	private (bool isUpdateAvailable, Version latestVersion, string releaseUrl)? updateInfo;
 
@@ -71,7 +69,10 @@ partial class UpdateCheckForm : Form
 
 			try
 			{
-				(isUpdateAvailable, latestVersion, updateUrl) = await Updater.GetUpdateInfo();
+				UpdateData updateData = await Updater.GetUpdateData();
+				isUpdateAvailable = Updater.IsUpdateAvailable(updateData) ?? false;
+				latestVersion = updateData.LatestVersion ?? throw new Exception("The update data sent by server are invalid (version not found).");
+				updateUrl = updateData.DetailsUrl?.ToString() ?? string.Empty;
 			}
 			catch (HttpRequestException)
 			{
@@ -79,17 +80,6 @@ partial class UpdateCheckForm : Form
 				updateDetailsRichTextBox.Text = """
 				An error occurred while checking for updates:
 				Failed to retrieve information from GitHub Releases. Check your internet connection and try again later.
-				""";
-
-				return;
-			}
-			catch (RateLimitExceededException)
-			{
-				updateStatusLabel.Text = "Error!";
-				updateDetailsRichTextBox.Text = """
-				Whoa, slow down!
-				You have exceeded the rate limit and the GitHub API has temporarily blocked you.
-				Wait for a few hours and try again.
 				""";
 
 				return;
