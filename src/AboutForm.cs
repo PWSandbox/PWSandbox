@@ -5,66 +5,31 @@ using System.Windows.Forms;
 
 namespace PWSandbox;
 
-internal partial class AboutForm : Form
+internal sealed partial class AboutForm : Form
 {
-	public AboutForm(Theme colorTheme = Theme.SimpleDark)
+	public AboutForm()
 	{
 		InitializeComponent();
 
-		if (Program.Version is not null) appVersionLabel.Text = $"v{Program.Version.ToString(3)}";
-
-		appDescriptionRichTextBox.Text = """
-			Simple sandbox game, built with .NET and Windows Forms.
-
-			You can find the PWSandbox Git repository at https://github.com/PWSandbox/PWSandbox.
-
-			This software is licensed under the MIT (Expat) License. You can find its text below.
-			""";
-
-		appLicenseRichTextBox.Text = """
-			Permission is hereby granted, free of charge, to any person obtaining a copy
-			of this software and associated documentation files (the ""Software""), to deal
-			in the Software without restriction, including without limitation the rights
-			to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-			copies of the Software, and to permit persons to whom the Software is
-			furnished to do so, subject to the following conditions:
-
-			The above copyright notice and this permission notice shall be included in all
-			copies or substantial portions of the Software.
-
-			THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-			IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-			FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-			AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-			LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-			OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-			SOFTWARE.
-			""";
-
-		SetTheme(colorTheme);
+		ApplyLocalization();
+		Localization.LocalizationChanged += (_, _) => ApplyLocalization();
 	}
 
-	private void OnLinkClick(object sender, LinkClickedEventArgs e) => Process.Start(new ProcessStartInfo(e.LinkText!) { UseShellExecute = true });
+	private void OpenLink(object sender, LinkClickedEventArgs e) => Process.Start(new ProcessStartInfo(e.LinkText!) { UseShellExecute = true });
 
-	private void SetTheme(Theme colorTheme)
+	private void ApplyLocalization()
 	{
-		var GuiColor = MenuForm.GuiColor[colorTheme];
+		RightToLeft = Localization.AreStringsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
+		RightToLeftLayout = Localization.AreStringsRightToLeft;
 
-		BackColor = GuiColor[ControlColor.Background];
-		ForeColor = GuiColor[ControlColor.Foreground];
-
-		appDescriptionRichTextBox.BackColor =
-		appLicenseRichTextBox.BackColor =
-		GuiColor[ControlColor.TextBoxBackground];
-
-		appDescriptionRichTextBox.ForeColor =
-		appLicenseRichTextBox.ForeColor =
-		GuiColor[ControlColor.TextBoxForeground];
-
-		okButton.BackColor = GuiColor[ControlColor.ButtonBackground];
-		okButton.ForeColor = GuiColor[ControlColor.ButtonForeground];
-
-		okButton.FlatAppearance.MouseOverBackColor = GuiColor[ControlColor.ButtonHovered];
-		okButton.FlatAppearance.MouseDownBackColor = GuiColor[ControlColor.ButtonClicked];
+		Text = Localization.StringById[StringId.AboutAppAction];
+		descriptionLabel.Text = Localization.StringById[StringId.DescriptionSection];
+		descriptionRichTextBox.Text = Localization.StringById[StringId.DescriptionText]
+			.Replace("\\(WEBSITE_LINK)", Program.Website);
+		licenseLabel.Text = Localization.StringById[StringId.LicenseSection];
+		licenseRichTextBox.Text = Program.License; // Not localized on purpose
+		appVersionLabel.Text = Localization.StringById[StringId.VersionText]
+			.Replace("\\(VERSION)", Program.FriendlyVersion).Replace("\\(BUILD_TYPE)", Program.BuildType);
+		okButton.Text = Localization.StringById[StringId.OkAction];
 	}
 }

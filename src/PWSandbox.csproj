@@ -7,16 +7,19 @@
     <Nullable>enable</Nullable>
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
-    <InvariantGlobalization>true</InvariantGlobalization>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <VersionPrefix>1.5.0</VersionPrefix>
+    <VersionPrefix>1.6.0</VersionPrefix>
 
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationVisualStyles>true</ApplicationVisualStyles>
     <ApplicationUseCompatibleTextRendering>false</ApplicationUseCompatibleTextRendering>
-    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
-    <ApplicationDefaultFont>Consolas, 9pt</ApplicationDefaultFont>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationDefaultFont>Segoe UI, 9pt</ApplicationDefaultFont>
     <ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
+
+    <AssemblyTitle>PWSandbox</AssemblyTitle>
+    <Product>PWSandbox</Product>
+    <Copyright>Copyright (c) 2024-2026 yarb00</Copyright>
   </PropertyGroup>
 
 </Project>

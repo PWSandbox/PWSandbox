@@ -1,5 +1,4 @@
-// PWSandbox ( https://github.com/PWSandbox/PWSandbox )
-// Licensed under the MIT (Expat) license; Copyright (c) 2024-2025 yarb00
+// https://pws.yarb00.dev
 
 namespace PWSandbox;
 
@@ -9,7 +8,7 @@ partial class MenuForm
 
 	protected override void Dispose(bool disposing)
 	{
-		if (disposing && (components != null)) components.Dispose();
+		if (disposing && components is not null) components.Dispose();
 		base.Dispose(disposing);
 	}
 
@@ -17,125 +16,149 @@ partial class MenuForm
 
 	private void InitializeComponent()
 	{
+		tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
 		appNameLabel = new System.Windows.Forms.Label();
+		loadMapButton = new System.Windows.Forms.Button();
 		aboutAppButton = new System.Windows.Forms.Button();
-		switchColorThemeButton = new System.Windows.Forms.Button();
 		checkForUpdatesButton = new System.Windows.Forms.Button();
-		mapOpenFileDialog = new System.Windows.Forms.OpenFileDialog();
-		loadMapFileButton = new System.Windows.Forms.Button();
+		languageLabel = new System.Windows.Forms.Label();
+		languageComboBox = new System.Windows.Forms.ComboBox();
+		openFileDialog = new System.Windows.Forms.OpenFileDialog();
+		tableLayoutPanel.SuspendLayout();
 		SuspendLayout();
-		//
+		// 
+		// tableLayoutPanel
+		// 
+		tableLayoutPanel.AutoSize = true;
+		tableLayoutPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+		tableLayoutPanel.ColumnCount = 1;
+		tableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+		tableLayoutPanel.Controls.Add(appNameLabel, 0, 0);
+		tableLayoutPanel.Controls.Add(loadMapButton, 0, 1);
+		tableLayoutPanel.Controls.Add(aboutAppButton, 0, 2);
+		tableLayoutPanel.Controls.Add(checkForUpdatesButton, 0, 3);
+		tableLayoutPanel.Controls.Add(languageLabel, 0, 4);
+		tableLayoutPanel.Controls.Add(languageComboBox, 0, 5);
+		tableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+		tableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+		tableLayoutPanel.Name = "tableLayoutPanel";
+		tableLayoutPanel.RowCount = 6;
+		tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+		tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+		tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+		tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+		tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
+		tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
+		tableLayoutPanel.Size = new System.Drawing.Size(264, 321);
+		tableLayoutPanel.TabIndex = 0;
+		// 
 		// appNameLabel
-		//
-		appNameLabel.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-		appNameLabel.Font = new System.Drawing.Font("Consolas", 36F);
-		appNameLabel.Location = new System.Drawing.Point(12, 9);
+		// 
+		appNameLabel.AutoSize = true;
+		appNameLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+		appNameLabel.Font = new System.Drawing.Font("Consolas", 36F, System.Drawing.FontStyle.Bold);
+		appNameLabel.Location = new System.Drawing.Point(3, 0);
 		appNameLabel.Name = "appNameLabel";
-		appNameLabel.Size = new System.Drawing.Size(288, 56);
-		appNameLabel.TabIndex = 0;
+		appNameLabel.Size = new System.Drawing.Size(258, 64);
+		appNameLabel.TabIndex = 1;
 		appNameLabel.Text = "PWSandbox";
 		appNameLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-		//
+		// 
+		// loadMapButton
+		// 
+		loadMapButton.AutoSize = true;
+		loadMapButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+		loadMapButton.Dock = System.Windows.Forms.DockStyle.Fill;
+		loadMapButton.Location = new System.Drawing.Point(3, 67);
+		loadMapButton.Name = "loadMapButton";
+		loadMapButton.Size = new System.Drawing.Size(258, 58);
+		loadMapButton.TabIndex = 2;
+		loadMapButton.Text = "LoadMapAction";
+		loadMapButton.UseVisualStyleBackColor = true;
+		loadMapButton.Click += LoadMap;
+		// 
 		// aboutAppButton
-		//
-		aboutAppButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-		aboutAppButton.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
-		aboutAppButton.FlatAppearance.BorderSize = 0;
-		aboutAppButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;
-		aboutAppButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
-		aboutAppButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-		aboutAppButton.Location = new System.Drawing.Point(159, 126);
+		// 
+		aboutAppButton.AutoSize = true;
+		aboutAppButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+		aboutAppButton.Dock = System.Windows.Forms.DockStyle.Fill;
+		aboutAppButton.Location = new System.Drawing.Point(3, 131);
 		aboutAppButton.Name = "aboutAppButton";
-		aboutAppButton.Size = new System.Drawing.Size(141, 23);
-		aboutAppButton.TabIndex = 4;
-		aboutAppButton.Text = "&About PWSandbox";
-		aboutAppButton.UseVisualStyleBackColor = false;
+		aboutAppButton.Size = new System.Drawing.Size(258, 58);
+		aboutAppButton.TabIndex = 3;
+		aboutAppButton.Text = "AboutAppAction";
+		aboutAppButton.UseVisualStyleBackColor = true;
 		aboutAppButton.Click += OpenAboutAppDialog;
-		//
-		// switchColorThemeButton
-		//
-		switchColorThemeButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-		switchColorThemeButton.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
-		switchColorThemeButton.FlatAppearance.BorderSize = 0;
-		switchColorThemeButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;
-		switchColorThemeButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
-		switchColorThemeButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-		switchColorThemeButton.Location = new System.Drawing.Point(159, 97);
-		switchColorThemeButton.Name = "switchColorThemeButton";
-		switchColorThemeButton.Size = new System.Drawing.Size(141, 23);
-		switchColorThemeButton.TabIndex = 3;
-		switchColorThemeButton.Text = "&Switch color theme";
-		switchColorThemeButton.UseVisualStyleBackColor = false;
-		switchColorThemeButton.Click += SwitchTheme;
-		//
+		// 
 		// checkForUpdatesButton
-		//
-		checkForUpdatesButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-		checkForUpdatesButton.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
-		checkForUpdatesButton.FlatAppearance.BorderSize = 0;
-		checkForUpdatesButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;
-		checkForUpdatesButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
-		checkForUpdatesButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-		checkForUpdatesButton.Location = new System.Drawing.Point(159, 68);
+		// 
+		checkForUpdatesButton.AutoSize = true;
+		checkForUpdatesButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+		checkForUpdatesButton.Dock = System.Windows.Forms.DockStyle.Fill;
+		checkForUpdatesButton.Location = new System.Drawing.Point(3, 195);
 		checkForUpdatesButton.Name = "checkForUpdatesButton";
-		checkForUpdatesButton.Size = new System.Drawing.Size(141, 23);
-		checkForUpdatesButton.TabIndex = 2;
-		checkForUpdatesButton.Text = "&Check for updates";
-		checkForUpdatesButton.UseVisualStyleBackColor = false;
-		checkForUpdatesButton.Click += CheckForUpdates;
-		//
-		// mapOpenFileDialog
-		//
-		mapOpenFileDialog.DefaultExt = "pws_map";
-		mapOpenFileDialog.Filter = "PWSandbox map files|*.pws_map";
-		mapOpenFileDialog.Title = "Select a PWSandbox map...";
-		//
-		// loadMapFileButton
-		//
-		loadMapFileButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-		loadMapFileButton.BackColor = System.Drawing.Color.FromArgb(64, 64, 64);
-		loadMapFileButton.FlatAppearance.BorderSize = 0;
-		loadMapFileButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;
-		loadMapFileButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
-		loadMapFileButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-		loadMapFileButton.Font = new System.Drawing.Font("Consolas", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, 0);
-		loadMapFileButton.Location = new System.Drawing.Point(12, 68);
-		loadMapFileButton.Name = "loadMapFileButton";
-		loadMapFileButton.Size = new System.Drawing.Size(141, 81);
-		loadMapFileButton.TabIndex = 1;
-		loadMapFileButton.Text = "&Load map!";
-		loadMapFileButton.UseVisualStyleBackColor = false;
-		loadMapFileButton.Click += LoadMapFile;
-		//
+		checkForUpdatesButton.Size = new System.Drawing.Size(258, 58);
+		checkForUpdatesButton.TabIndex = 4;
+		checkForUpdatesButton.Text = "CheckForUpdatesAction";
+		checkForUpdatesButton.UseVisualStyleBackColor = true;
+		checkForUpdatesButton.Click += OpenUpdaterDialog;
+		// 
+		// languageLabel
+		// 
+		languageLabel.AutoSize = true;
+		languageLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+		languageLabel.Location = new System.Drawing.Point(3, 256);
+		languageLabel.Name = "languageLabel";
+		languageLabel.Size = new System.Drawing.Size(258, 32);
+		languageLabel.TabIndex = 5;
+		languageLabel.Text = "LanguageSection";
+		languageLabel.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+		// 
+		// languageComboBox
+		// 
+		languageComboBox.Dock = System.Windows.Forms.DockStyle.Fill;
+		languageComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+		languageComboBox.FormattingEnabled = true;
+		languageComboBox.Location = new System.Drawing.Point(3, 291);
+		languageComboBox.Name = "languageComboBox";
+		languageComboBox.Size = new System.Drawing.Size(258, 23);
+		languageComboBox.TabIndex = 6;
+		languageComboBox.SelectedIndexChanged += ChangeLanguage;
+		// 
+		// openFileDialog
+		// 
+		openFileDialog.DefaultExt = "pws_map";
+		openFileDialog.Filter = "PWSandbox maps|*.pws_map";
+		openFileDialog.Title = "MapFileSelectionTitle";
+		// 
 		// MenuForm
-		//
-		AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-		AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-		BackColor = System.Drawing.Color.Black;
-		ClientSize = new System.Drawing.Size(312, 159);
-		Controls.Add(loadMapFileButton);
-		Controls.Add(checkForUpdatesButton);
-		Controls.Add(switchColorThemeButton);
-		Controls.Add(aboutAppButton);
-		Controls.Add(appNameLabel);
-		Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-		ForeColor = System.Drawing.Color.White;
+		// 
+		AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+		AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+		AutoSize = true;
+		AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+		ClientSize = new System.Drawing.Size(264, 321);
+		Controls.Add(tableLayoutPanel);
 		FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 		MaximizeBox = false;
-		MaximumSize = new System.Drawing.Size(328, 198);
-		MinimumSize = new System.Drawing.Size(328, 198);
+		MinimumSize = new System.Drawing.Size(280, 360);
 		Name = "MenuForm";
 		ShowIcon = false;
 		Text = "PWSandbox";
+		tableLayoutPanel.ResumeLayout(false);
+		tableLayoutPanel.PerformLayout();
 		ResumeLayout(false);
+		PerformLayout();
 	}
 
 	#endregion
 
+	private System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
 	private System.Windows.Forms.Label appNameLabel;
+	private System.Windows.Forms.Button loadMapButton;
 	private System.Windows.Forms.Button aboutAppButton;
-	private System.Windows.Forms.Button switchColorThemeButton;
 	private System.Windows.Forms.Button checkForUpdatesButton;
-	private System.Windows.Forms.OpenFileDialog mapOpenFileDialog;
-	private System.Windows.Forms.Button loadMapFileButton;
+	private System.Windows.Forms.Label languageLabel;
+	private System.Windows.Forms.ComboBox languageComboBox;
+	private System.Windows.Forms.OpenFileDialog openFileDialog;
 }

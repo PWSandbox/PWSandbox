@@ -2,140 +2,82 @@
 
 using System;
 using System.Diagnostics;
-using System.Net.Http;
 using System.Windows.Forms;
 
 namespace PWSandbox;
 
-internal partial class UpdateCheckForm : Form
+internal sealed partial class UpdateCheckForm : Form
 {
-	private (bool isUpdateAvailable, Version latestVersion, string releaseUrl)? updateInfo;
+	private string latestVersion = string.Empty, updateUrl = string.Empty, errorMessage = string.Empty;
+	private StringId updateCheckStatus = StringId.CheckingForUpdatesStatus, updateCheckDetails = StringId.CheckingForUpdatesStatusDetails;
 
-	public UpdateCheckForm((bool isUpdateAvailable, Version latestVersion, string releaseUrl)? updateInfo = null,
-		Theme colorTheme = Theme.SimpleDark)
+	public UpdateCheckForm()
 	{
 		InitializeComponent();
 
-		if (Program.Version is null) appVersionLabel.Text = "Installed version: Unknown!";
-		else appVersionLabel.Text = $"Installed version: {Program.Version.ToString(3)}";
-
-		this.updateInfo = updateInfo;
-		SetTheme(colorTheme);
+		ApplyLocalization();
+		Localization.LocalizationChanged += (_, _) => ApplyLocalization();
 	}
 
-	private void SetTheme(Theme colorTheme)
-	{
-		var GuiColor = MenuForm.GuiColor[colorTheme];
-
-		BackColor = GuiColor[ControlColor.Background];
-		ForeColor = GuiColor[ControlColor.Foreground];
-
-		updateDetailsRichTextBox.BackColor = GuiColor[ControlColor.TextBoxBackground];
-		updateDetailsRichTextBox.ForeColor = GuiColor[ControlColor.TextBoxForeground];
-
-		foreach (Control control in Controls)
-		{
-			if (control is not Button button) continue;
-
-			button.BackColor = GuiColor[ControlColor.ButtonBackground];
-			button.ForeColor = GuiColor[ControlColor.ButtonForeground];
-			button.FlatAppearance.MouseOverBackColor = GuiColor[ControlColor.ButtonHovered];
-			button.FlatAppearance.MouseDownBackColor = GuiColor[ControlColor.ButtonClicked];
-		}
-	}
+	private void ViewUpdate(object sender, EventArgs e) => Process.Start(new ProcessStartInfo(updateUrl) { UseShellExecute = true });
 
 	private async void CheckForUpdates(object sender, EventArgs e)
 	{
-		if (Program.Version is null)
+		bool isUpdateAvailable;
+		Version latestVersion;
+
+		try
 		{
-			updateStatusLabel.Text = "Error!";
-			updateDetailsRichTextBox.Text = """
-				An error occurred while checking for updates:
-				Current version of this PWSandbox executable is unknown (possibly corrupted!), so it's impossible to check for updates.
-				""";
+			UpdateData updateData = await Updater.GetUpdateData();
+			isUpdateAvailable = Updater.IsUpdateAvailable(updateData) ?? false;
+			latestVersion = updateData.LatestVersion ?? throw new FormatException("The update data sent by server is not valid (version field not found).");
+			this.latestVersion = latestVersion.ToString(3);
+			updateUrl = updateData.DetailsUrl?.ToString() ?? string.Empty;
+		}
+		catch (Exception ex)
+		{
+			updateCheckStatus = StringId.ErrorStatus;
+			updateCheckDetails = StringId.ErrorStatusDetails;
+
+			errorMessage = ex.ToString();
+
+			ApplyLocalization();
 
 			return;
 		}
 
-		bool isUpdateAvailable;
-		Version latestVersion;
-		string updateUrl;
-
-		if (updateInfo is not null) (isUpdateAvailable, latestVersion, updateUrl) = ((bool, Version, string))updateInfo;
-		else
-		{
-			updateStatusLabel.Text = "Checking for updates...";
-			updateDetailsRichTextBox.Text = "Please wait... Fetching the latest data from the GitHub Releases API...";
-
-			try
-			{
-				UpdateData updateData = await Updater.GetUpdateData();
-				isUpdateAvailable = Updater.IsUpdateAvailable(updateData) ?? false;
-				latestVersion = updateData.LatestVersion ?? throw new Exception("The update data sent by server are invalid (version not found).");
-				updateUrl = updateData.DetailsUrl?.ToString() ?? string.Empty;
-			}
-			catch (HttpRequestException)
-			{
-				updateStatusLabel.Text = "Error!";
-				updateDetailsRichTextBox.Text = """
-				An error occurred while checking for updates:
-				Failed to retrieve information from GitHub Releases. Check your internet connection and try again later.
-				""";
-
-				return;
-			}
-			catch (Exception ex)
-			{
-				string
-					exceptionMessage = ex.Message,
-					innerExceptionMessage = ex.InnerException?.Message ?? "[Not present.]",
-					exceptionDetails = ex.StackTrace ?? "[Not present.]",
-					innerExceptionDetails = ex.InnerException?.StackTrace ?? "[Not present.]";
-
-				updateStatusLabel.Text = "Error!";
-				updateDetailsRichTextBox.Text = $"""
-				An error occurred while checking for updates.
-
-				========== Details: ==========
-
-				Message (inner exception): {innerExceptionMessage}
-				Message: {exceptionMessage}
-				
-				----- Stack trace (inner exception): -----
-				{innerExceptionDetails}
-				
-				----- Stack trace: -----
-				{exceptionDetails}
-				""";
-
-				return;
-			}
-		}
-
 		if (isUpdateAvailable)
 		{
-			newVersionLabel.Text = $"Latest version: {latestVersion.ToString(3)})";
+			latestVersionLabel.Enabled = viewUpdateButton.Enabled = true;
+			latestVersionLabel.Visible = viewUpdateButton.Visible = true;
 
-			newVersionLabel.Enabled = true;
-			viewUpdateButton.Enabled = true;
-			newVersionLabel.Visible = true;
-			viewUpdateButton.Visible = true;
-
-			updateStatusLabel.Text = "An update is available!";
-			updateDetailsRichTextBox.Text = $"To learn more info about the new PWSandbox v{latestVersion.ToString(3)} and download it, press the \"View update\" button below.";
+			updateCheckStatus = StringId.UpdateAvailableStatus;
+			updateCheckDetails = StringId.UpdateAvailableStatusDetails;
 		}
 		else
 		{
-			updateStatusLabel.Text = "No updates!";
-			updateDetailsRichTextBox.Text = "Congratulations! You're using the most recent version.";
+			updateCheckStatus = StringId.NoUpdateAvailableStatus;
+			updateCheckDetails = StringId.NoUpdateAvailableStatusDetails;
 		}
+
+		ApplyLocalization();
 	}
 
-	private void ViewUpdate(object sender, EventArgs e)
+	private void ApplyLocalization()
 	{
-		if (updateInfo is null) return;
+		RightToLeft = Localization.AreStringsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
+		RightToLeftLayout = Localization.AreStringsRightToLeft;
 
-		string url = (((bool, Version, string))updateInfo).Item3;
-		Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+		Text = Localization.StringById[StringId.UpdateCheckTitle];
+		updateCheckStatusLabel.Text = Localization.StringById[updateCheckStatus];
+		updateCheckDetailsLabel.Text = Localization.StringById[StringId.DetailsSection];
+		updateCheckDetailsRichTextBox.Text = Localization.StringById[updateCheckDetails]
+			.Replace("\\(ERROR_MESSAGE)", errorMessage);
+		latestVersionLabel.Text = Localization.StringById[StringId.LatestVersionInfoText]
+			.Replace("\\(VERSION)", latestVersion);
+		currentVersionLabel.Text = Localization.StringById[StringId.CurrentVersionInfoText]
+			.Replace("\\(VERSION)", Program.FriendlyVersion);
+		viewUpdateButton.Text = Localization.StringById[StringId.SeeUpdateAction];
+		closeButton.Text = Localization.StringById[StringId.CloseAction];
 	}
 }

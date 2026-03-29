@@ -12,6 +12,6 @@ trim_trailing_whitespace = false
 [*.cs]
 indent_style = tab
 
-[*.{csproj,slnx}]
+[*.{csproj,slnx,yml}]
 indent_style = space
 indent_size = 2

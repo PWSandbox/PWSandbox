@@ -1,5 +1,4 @@
-// PWSandbox ( https://github.com/PWSandbox/PWSandbox )
-// Licensed under the MIT (Expat) license; Copyright (c) 2024-2025 yarb00
+// https://pws.yarb00.dev
 
 namespace PWSandbox;
 
@@ -9,7 +8,7 @@ partial class PlayForm
 
 	protected override void Dispose(bool disposing)
 	{
-		if (disposing && (components != null)) components.Dispose();
+		if (disposing && components is not null) components.Dispose();
 		base.Dispose(disposing);
 	}
 
@@ -18,21 +17,20 @@ partial class PlayForm
 	private void InitializeComponent()
 	{
 		SuspendLayout();
-		//
+		// 
 		// PlayForm
-		//
-		AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-		AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-		BackColor = System.Drawing.Color.Black;
-		ClientSize = new System.Drawing.Size(464, 321);
+		// 
+		AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+		ClientSize = new System.Drawing.Size(0, 0);
 		DoubleBuffered = true;
-		ForeColor = System.Drawing.Color.White;
 		FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 		KeyPreview = true;
 		MaximizeBox = false;
 		Name = "PlayForm";
 		ShowIcon = false;
-		Text = "PWSandbox [Play]";
+		Text = "PlayModeTitle";
+		DpiChanged += UpdateScaling;
+		Paint += ProcessMap;
 		KeyDown += OnKeyDown;
 		ResumeLayout(false);
 	}

@@ -22,7 +22,8 @@ internal static class Updater
 	public static async Task<UpdateData> GetUpdateData()
 	{
 		using HttpClient httpClient = new();
-		httpClient.DefaultRequestHeaders.UserAgent.Add(new("PWSandbox", Program.FriendlyVersion));
+		httpClient.DefaultRequestHeaders.Accept.Add(new("application/json"));
+		httpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"PWSandbox/{Program.FriendlyVersion} (+{Program.Website})");
 
 		string rawUpdateData;
 		try
