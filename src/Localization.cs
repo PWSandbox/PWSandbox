@@ -117,7 +117,7 @@ internal static class Localization
 				Website: \(WEBSITE_LINK)
 				""",
 			[StringId.LicenseSection] = "License:",
-			[StringId.VersionText] = "Version \\(VERSION), \\(BUILD_TYPE) build",
+			[StringId.VersionText] = "Version \\(VERSION), \\(BUILD_TYPE) build, \\(COMPILATION_TYPE)",
 			[StringId.OkAction] = "OK",
 			[StringId.UpdateCheckTitle] = "PWSandbox Updater",
 			[StringId.LatestVersionInfoText] = "Latest version: \\(VERSION)",
@@ -195,7 +195,7 @@ internal static class Localization
 				Сайт: \(WEBSITE_LINK)
 				""",
 			[StringId.LicenseSection] = "Текст лицензии (на английском):",
-			[StringId.VersionText] = "Версия \\(VERSION) (\\(BUILD_TYPE))",
+			[StringId.VersionText] = "Версия \\(VERSION) (\\(BUILD_TYPE), \\(COMPILATION_TYPE))",
 			[StringId.OkAction] = "OK",
 			[StringId.UpdateCheckTitle] = "Проверка обновлений PWSandbox",
 			[StringId.LatestVersionInfoText] = "Последняя версия: \\(VERSION)",
@@ -239,7 +239,7 @@ internal static class Localization
 			[StringId.DescriptionSection] = localizationTestText,
 			[StringId.DescriptionText] = "\\(WEBSITE_LINK)",
 			[StringId.LicenseSection] = localizationTestText,
-			[StringId.VersionText] = "\\(BUILD_TYPE) v\\(VERSION)",
+			[StringId.VersionText] = "\\(COMPILATION_TYPE) \\(BUILD_TYPE) v\\(VERSION)",
 			[StringId.OkAction] = "👍",
 			[StringId.UpdateCheckTitle] = localizationTestText,
 			[StringId.LatestVersionInfoText] = "\\(VERSION)",

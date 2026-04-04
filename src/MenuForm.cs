@@ -15,7 +15,13 @@ internal sealed partial class MenuForm : Form
 
 		ApplyLocalization();
 		Localization.LocalizationChanged += (_, _) => ApplyLocalization();
+
+#if NATIVEAOT
+		foreach (Language language in Localization.AvailableLanguages) languageComboBox.Items.Add(language);
+		languageComboBox.SelectedIndex = 0;
+#else
 		languageComboBox.DataSource = Localization.AvailableLanguages;
+#endif
 	}
 
 	private void LoadMap(object sender, EventArgs e)

@@ -29,7 +29,13 @@ internal sealed partial class AboutForm : Form
 		licenseLabel.Text = Localization.StringById[StringId.LicenseSection];
 		licenseRichTextBox.Text = Program.License; // Not localized on purpose
 		appVersionLabel.Text = Localization.StringById[StringId.VersionText]
-			.Replace("\\(VERSION)", Program.FriendlyVersion).Replace("\\(BUILD_TYPE)", Program.BuildType);
+			.Replace("\\(VERSION)", Program.FriendlyVersion)
+			.Replace("\\(BUILD_TYPE)", Program.BuildType)
+#if NATIVEAOT
+			.Replace("\\(COMPILATION_TYPE)", "NativeAOT");
+#else
+			.Replace("\\(COMPILATION_TYPE)", "JIT");
+#endif
 		okButton.Text = Localization.StringById[StringId.OkAction];
 	}
 }
