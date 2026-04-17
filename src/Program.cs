@@ -11,12 +11,6 @@ namespace PWSandbox;
 
 internal static class Program
 {
-#if DEBUG
-	public const string BuildType = "Debug";
-#else
-	public const string BuildType = "Release";
-#endif
-
 	public const string Website = "https://pws.yarb00.dev";
 	public const string License = """
 		Copyright (c) 2024-2026 yarb00

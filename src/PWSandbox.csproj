@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <OutputType>WinExe</OutputType>
     <PublishAot Condition="'$(Configuration)' == 'Release'">true</PublishAot>
-    <_SuppressWinFormsTrimError>true</_SuppressWinFormsTrimError>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <VersionPrefix>1.6.0</VersionPrefix>
+    <VersionSuffix>dev</VersionSuffix> <!-- Before the release -->
 
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationVisualStyles>true</ApplicationVisualStyles>
@@ -18,13 +18,14 @@
     <ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
 
     <AssemblyTitle>PWSandbox</AssemblyTitle>
-    <Product>PWSandbox</Product>
     <Copyright>Copyright (c) 2024-2026 yarb00</Copyright>
+    <Product>PWSandbox</Product>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(PublishAot)' == 'true'">
+    <_SuppressWinFormsTrimError>true</_SuppressWinFormsTrimError>
+    <DefineConstants>NATIVE_AOT</DefineConstants>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <DefineConstants>NATIVEAOT</DefineConstants>
   </PropertyGroup>
 
 </Project>

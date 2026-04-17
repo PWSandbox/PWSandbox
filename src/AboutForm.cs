@@ -7,6 +7,18 @@ namespace PWSandbox;
 
 internal sealed partial class AboutForm : Form
 {
+#if DEBUG
+	private const string buildType = "Debug";
+#else
+	private const string buildType = "Release";
+#endif
+
+#if NATIVE_AOT
+	private const string compilationType = "AOT";
+#else
+	private const string compilationType = "JIT";
+#endif
+
 	public AboutForm()
 	{
 		InitializeComponent();
@@ -30,12 +42,8 @@ internal sealed partial class AboutForm : Form
 		licenseRichTextBox.Text = Program.License; // Not localized on purpose
 		appVersionLabel.Text = Localization.StringById[StringId.VersionText]
 			.Replace("\\(VERSION)", Program.FriendlyVersion)
-			.Replace("\\(BUILD_TYPE)", Program.BuildType)
-#if NATIVEAOT
-			.Replace("\\(COMPILATION_TYPE)", "NativeAOT");
-#else
-			.Replace("\\(COMPILATION_TYPE)", "JIT");
-#endif
+			.Replace("\\(BUILD_TYPE)", buildType)
+			.Replace("\\(COMPILATION_TYPE)", compilationType);
 		okButton.Text = Localization.StringById[StringId.OkAction];
 	}
 }
