@@ -1,7 +1,6 @@
 // https://pws.yarb00.dev
 
 using System;
-using System.IO;
 using System.Windows.Forms;
 
 namespace PWSandbox;
@@ -33,7 +32,7 @@ internal sealed partial class MenuForm : Form
 		{
 			map = MapParser.ParseMapFromFile(openFileDialog.FileName);
 		}
-		catch (Exception ex) when (ex is FileFormatException or NotSupportedException or FormatException)
+		catch (Exception ex) when (ex is FormatException or NotSupportedException)
 		{
 			MessageBox.Show(
 				this,

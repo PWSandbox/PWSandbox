@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace PWSandbox;
 
@@ -24,16 +25,20 @@ internal readonly record struct Map(MapObject[,] Objects);
 
 internal static class MapParser
 {
+	/// <summary>
+	/// Reads a file, parses its contents and creates a new <see cref="Map" /> object from it.
+	/// </summary>
+	/// <param name="filePath">The path to the file.</param>
+	/// <param name="mapVersion">The map's version or <see langword="null" /> if it is unknown.</param>
+	/// <returns>A <see cref="Map" /> parsed from the file.</returns>
+	/// <exception cref="FormatException">Thrown when the provided map is empty, its version could not be detected or it is incorrect and cannot be parsed.</exception>
+	/// <exception cref="NotSupportedException">Thrown when the version of the provided map is not supported.</exception>
 	public static Map ParseMapFromFile(string filePath, MapVersion? mapVersion = null)
 	{
 		try
 		{
-			string[] mapLines = File.ReadAllLines(filePath);
+			string[] mapLines = File.ReadAllLines(filePath, Encoding.UTF8);
 			return ParseMapFromStringArray(mapLines, mapVersion);
-		}
-		catch (ArgumentException e) when (e.ParamName == "mapLines")
-		{
-			throw new FileFormatException("Provided file is empty.", e);
 		}
 		catch
 		{
@@ -41,17 +46,28 @@ internal static class MapParser
 		}
 	}
 
+	/// <summary>
+	/// Parses the provided map and creates a new <see cref="Map" /> object from it.
+	/// </summary>
+	/// <param name="mapLines">The map's contents.</param>
+	/// <param name="mapVersion">The map's version or <see langword="null" /> if it is unknown.</param>
+	/// <returns>A <see cref="Map" /> parsed from <paramref name="mapLines" />.</returns>
+	/// <exception cref="FormatException">Thrown when the provided map is empty, its version could not be detected or it is incorrect and cannot be parsed.</exception>
+	/// <exception cref="NotSupportedException">Thrown when the version of the provided map is not supported.</exception>
 	public static Map ParseMapFromStringArray(string[] mapLines, MapVersion? mapVersion = null)
 	{
-		if (mapLines.Length == 0) throw new ArgumentException("Map cannot be empty.", nameof(mapLines));
+		if (mapLines.Length == 0) throw new FormatException("Map cannot be empty.");
 
 		if (mapVersion is null)
 		{
-			if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.0;", true, null))
-				mapVersion = MapVersion.V1_0;
-			else if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.1;", true, null))
-				mapVersion = MapVersion.V1_1;
-			else throw new NotSupportedException("Failed to detect map version.");
+			try
+			{
+				mapVersion = DetectMapVersionFromStringArray(mapLines);
+			}
+			catch
+			{
+				throw;
+			}
 		}
 
 		try
@@ -69,6 +85,24 @@ internal static class MapParser
 		}
 	}
 
+	/// <summary>
+	/// Detects the version of the provided map.
+	/// </summary>
+	/// <remarks>
+	/// Does not guarantee that the map is correct and can be parsed.
+	/// </remarks>
+	/// <param name="mapLines">The map's contents.</param>
+	/// <returns>A <see cref="MapVersion" /> indicating the map's version.</returns>
+	/// <exception cref="FormatException">Thrown when the provided map is empty or its version could not be detected.</exception>
+	public static MapVersion DetectMapVersionFromStringArray(string[] mapLines)
+	{
+		if (mapLines.Length == 0) throw new FormatException("Map cannot be empty.");
+
+		if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.0;", true, null)) return MapVersion.V1_0;
+		else if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.1;", true, null)) return MapVersion.V1_1;
+		else throw new FormatException("Failed to detect map version.");
+	}
+
 	#region Parsers
 
 	private static Map ParseMapV1_0(string[] mapLines) => ParseMapV1_1(mapLines, legacyBehavior: true);
@@ -79,7 +113,9 @@ internal static class MapParser
 		{
 			string mapHeader = legacyBehavior ? "?PWSandbox-Map 1.0;" : "?PWSandbox-Map 1.1;";
 
-			mapLines = mapLines.Where(str => !string.IsNullOrWhiteSpace(str)).ToArray();
+			mapLines = mapLines.Where(@string => !string.IsNullOrWhiteSpace(@string)).ToArray();
+
+			if (mapLines.Length == 0) throw new FormatException($"Map cannot be empty.");
 
 			switch (y)
 			{
@@ -104,7 +140,6 @@ internal static class MapParser
 					{
 						mapLines[^1] = mapLines[^1].TrimEnd().Remove(mapLines[^1].Length - "(map: end)".Length, "(map: end)".Length);
 						mapLines = mapLines.Where(@string => !string.IsNullOrWhiteSpace(@string)).ToArray();
-
 						break;
 					}
 					else throw new FormatException($"Expected '(map: end)' in the end, but it was not found.");
