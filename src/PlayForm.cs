@@ -101,23 +101,18 @@ internal sealed partial class PlayForm : Form
 						DrawCell(e.Graphics, new(x, y), ColorByMapObject[MapObject.Void]);
 						break;
 
-					case MapObject.Finish:
-						if (playerPosition == new Position(x, y) && lastFinish != new Position(x, y))
-						{
-							MessageBox.Show(
-								this,
-								Localization.StringById[StringId.FinishReachedText],
-								Localization.StringById[StringId.PlayModeTitle],
-								MessageBoxButtons.OK,
-								MessageBoxIcon.Information,
-								MessageBoxDefaultButton.Button1,
-								Localization.AreStringsRightToLeft ? MessageBoxOptions.RightAlign | MessageBoxOptions.RtlReading : 0
-							);
-
-							lastFinish = playerPosition;
-						}
-						DrawCell(e.Graphics, new(x, y), ColorByMapObject[MapObject.Finish]);
-						break;
+					case MapObject.Finish when playerPosition == new Position(x, y) && lastFinish != new Position(x, y):
+						MessageBox.Show(
+							this,
+							Localization.StringById[StringId.FinishReachedText],
+							Localization.StringById[StringId.PlayModeTitle],
+							MessageBoxButtons.OK,
+							MessageBoxIcon.Information,
+							MessageBoxDefaultButton.Button1,
+							Localization.AreStringsRightToLeft ? MessageBoxOptions.RightAlign | MessageBoxOptions.RtlReading : 0
+						);
+						lastFinish = playerPosition;
+						goto default;
 
 					default:
 						DrawCell(e.Graphics, new(x, y), ColorByMapObject[mapObjects[y, x]]);
