@@ -105,8 +105,6 @@ internal static class Program
 
 	private class ArgumentsApplicationContext : ApplicationContext
 	{
-		private int openForms = 0;
-
 		public ArgumentsApplicationContext(string[] filePaths)
 		{
 			int totalMaps = filePaths.Length, successfulMaps = 0, failedMaps = 0;
@@ -124,22 +122,19 @@ internal static class Program
 					failedMaps++;
 					results.Add(
 						Localization.StringById[StringId.MapLoadingFailedText]
-						.Replace("\\(MAP)", filePath).Replace("\\(ERROR_MESSAGE)", ex.Message)
+							.Replace("\\(MAP)", filePath)
+							.Replace("\\(ERROR_MESSAGE)", ex.Message)
 					);
 
 					continue;
 				}
 
 				successfulMaps++;
-				results.Add(
-					Localization.StringById[StringId.MapLoadedSuccessfullyText]
-					.Replace("\\(MAP)", filePath)
-				);
+				results.Add(Localization.StringById[StringId.MapLoadedSuccessfullyText].Replace("\\(MAP)", filePath));
 
 				PlayForm playForm = new(map);
-				playForm.FormClosed += (_, _) => OnFormClosed();
+				playForm.FormClosed += (_, _) => { if (Application.OpenForms.Count == 0) ExitThread(); };
 				playForm.Show();
-				openForms++;
 			}
 
 			TaskDialog.ShowDialog(new()
@@ -168,12 +163,8 @@ internal static class Program
 					.Replace("\\(SUCCESSFUL_MAPS)", successfulMaps.ToString())
 					.Replace("\\(FAILED_MAPS)", failedMaps.ToString())
 			});
-		}
 
-		private void OnFormClosed()
-		{
-			openForms--;
-			if (openForms == 0) ExitThread();
+			if (Application.OpenForms.Count == 0) Environment.Exit(0); // Exit if no maps loaded successfully
 		}
 	}
 }
