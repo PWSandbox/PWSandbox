@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace PWSandbox;
 
@@ -31,13 +32,6 @@ internal static class Localization
 			LanguageId = "en",
 			InternationalName = "English",
 			SelfName = "English",
-			IsRightToLeft = false
-		},
-		new Language
-		{
-			LanguageId = "ru",
-			InternationalName = "Russian",
-			SelfName = "Русский",
 			IsRightToLeft = false
 		},
 #if DEBUG
@@ -137,84 +131,6 @@ internal static class Localization
 			[StringId.UpdateAvailableStatusDetails] = "To see more info about the new PWSandbox update, press the \"View update\" button.",
 			[StringId.NoUpdateAvailableStatusDetails] = "Congratulations! You're using the latest version."
 		},
-		["ru"] = new()
-		{
-			[StringId.UnhandledExceptionTitle] = "PWSandbox: Необработанное исключение...",
-			[StringId.UnhandledExceptionResumingNotAllowedText] = """
-				Возникло необработанное исключение (ошибка).
-
-				\(REPORT_LINK_START)[Сообщить об ошибке]\(REPORT_LINK_END)
-
-				Нажмите кнопку "Закрыть", чтобы выйти из PWSandbox.
-				""",
-			[StringId.UnhandledExceptionResumingAllowedText] = """
-				Возникло необработанное исключение (ошибка).
-				
-				\(REPORT_LINK_START)[Сообщить об ошибке]\(REPORT_LINK_END)
-
-				Нажмите кнопку "Закрыть", чтобы выйти из PWSandbox.
-				Вы также можете нажать кнопку "Продолжить", чтобы попытаться проигнорировать ошибку и вернуться в PWSandbox.
-				Однако нет гарантий, что всё будет работать стабильно или вообще будет работать.
-				""",
-			[StringId.ShowDetailsAction] = "Показать подробности",
-			[StringId.HideDetailsAction] = "Скрыть подробности",
-			[StringId.DetailsSection] = "===== Подробнее: =====",
-			[StringId.MapFileSelectionTitle] = "Выберите карту PWSandbox...",
-			[StringId.MapFileErrorTitle] = "Карта PWSandbox: Ошибка!",
-			[StringId.MapFileErrorText] = """
-				Не удалось загрузить карту.
-				Либо она предназначена для более новой версии PWSandbox, либо содержит ошибки.
-
-				Сообщите создателю карты об этой проблеме.
-				Если карту создали вы и пытаетесь загрузить её в поддерживаемой версии PWSandbox,
-				остаётся только одно: вы допустили ошибку при написании карты. Подробности ниже.
-				""",
-			[StringId.LoadMapAction] = "Открыть карту...",
-			[StringId.AboutAppAction] = "О программе",
-			[StringId.CheckForUpdatesAction] = "Проверить наличие обновлений",
-			[StringId.LanguageSection] = "Язык PWSandbox:",
-			[StringId.PlayModeTitle] = "Карта PWSandbox",
-			[StringId.FinishReachedText] = "Вы пришли к финишу!",
-			[StringId.MapLoadingStatus] = """
-				Из \(TOTAL_MAPS) карт:
-				\(SUCCESSFUL_MAPS) успешно загрузились,
-				и \(FAILED_MAPS) из них PWSandbox не смог загрузить.
-				""",
-			[StringId.MapLoadedSuccessfullyText] = """
-				Карта "\(MAP)"
-				успешно загружена.
-				""",
-			[StringId.MapLoadingFailedText] = """
-				Во время загрузки карты "\(MAP)" произошла ошибка:
-				\(ERROR_MESSAGE)
-				""",
-			[StringId.DescriptionSection] = "Описание:",
-			[StringId.DescriptionText] = """
-				Игра-песочница, написанная на C# с использованием Windows Forms.
-
-				Сайт: \(WEBSITE_LINK)
-				""",
-			[StringId.LicenseSection] = "Текст лицензии (на английском):",
-			[StringId.VersionText] = "Версия \\(VERSION) (\\(BUILD_TYPE), \\(COMPILATION_TYPE))",
-			[StringId.OkAction] = "OK",
-			[StringId.UpdateCheckTitle] = "Проверка обновлений PWSandbox",
-			[StringId.LatestVersionInfoText] = "Последняя версия: \\(VERSION)",
-			[StringId.CurrentVersionInfoText] = "Установленная версия: \\(VERSION)",
-			[StringId.SeeUpdateAction] = "Открыть страницу обновления",
-			[StringId.CloseAction] = "Закрыть",
-			[StringId.CheckingForUpdatesStatus] = "Проверка наличия обновлений...",
-			[StringId.ErrorStatus] = "Ошибка...",
-			[StringId.UpdateAvailableStatus] = "Доступно обновление...",
-			[StringId.NoUpdateAvailableStatus] = "Обновлений нет...",
-			[StringId.CheckingForUpdatesStatusDetails] = "Получение данных с сервера...",
-			[StringId.ErrorStatusDetails] = """
-				Во время проверки обновлений произошла ошибка:
-
-				\(ERROR_MESSAGE)
-				""",
-			[StringId.UpdateAvailableStatusDetails] = "Чтобы узнать больше о последнем обновлении PWSandbox, выберите \"Открыть страницу обновления\".",
-			[StringId.NoUpdateAvailableStatusDetails] = "Ура! У вас актуальная версия."
-		},
 #if DEBUG
 		["test"] = new()
 		{
@@ -262,7 +178,7 @@ internal static class Localization
 	private const string localizationTestText = "أنا اجيب أن أبي. أبي هو يعمل كثيرا و يساعدوني في حياتي. أبي هو لطيف و محبوب. هو يحب أن يساعد الناس هو لا يسكن في بيت.";
 #endif
 
-	public static void SetLanguage(string languageId)
+	public static void SetCurrentLanguage(string languageId)
 	{
 		if (!LocalizationByLanguageId.TryGetValue(languageId, out Dictionary<StringId, string>? localization)) throw new KeyNotFoundException($"Language '{languageId}' is not available.");
 
@@ -270,5 +186,39 @@ internal static class Localization
 		AreStringsRightToLeft = AvailableLanguages.Find(language => language.LanguageId == languageId).IsRightToLeft;
 
 		LocalizationChanged?.Invoke(null, EventArgs.Empty);
+	}
+
+	public static void LoadLanguage(XDocument xml)
+	{
+		XElement
+			rootElement = xml.Root ?? throw new FormatException("XML document is empty."),
+			metaElement = rootElement.Element("Meta") ?? throw new FormatException("'Meta' section is not found."),
+			stringsElement = rootElement.Element("Strings") ?? throw new FormatException("'Strings' section is not found.");
+
+		XElement
+			languageIdElement = metaElement.Element("LanguageId") ?? throw new FormatException("'LanguageId' value is not found."),
+			internationalNameElement = metaElement.Element("InternationalName") ?? throw new FormatException("'InternationalName' value is not found."),
+			selfNameElement = metaElement.Element("SelfName") ?? throw new FormatException("'SelfName' value is not found."),
+			isRightToLeftElement = metaElement.Element("IsRightToLeft") ?? throw new FormatException("'IsRightToLeft' value is not found.");
+
+		if (!bool.TryParse(isRightToLeftElement.Value, out bool isRightToLeft)) throw new FormatException($"'IsRightToLeft' value is invalid (expected 'true' or 'false', got '{isRightToLeftElement.Value}').");
+
+		Language language = new()
+		{
+			LanguageId = languageIdElement.Value.Trim(),
+			InternationalName = internationalNameElement.Value.Trim(),
+			SelfName = selfNameElement.Value.Trim(),
+			IsRightToLeft = isRightToLeft
+		};
+
+		Dictionary<StringId, string> localization = [];
+		foreach (StringId stringId in Enum.GetValues<StringId>())
+		{
+			XElement? translation = stringsElement.Element($"_{stringId}");
+			localization[stringId] = translation?.Value ?? LocalizationByLanguageId["en"][stringId]; // If string is not translated, use the original English text
+		}
+
+		if (!LocalizationByLanguageId.TryAdd(language.LanguageId, localization)) throw new Exception($"Language with ID '{language.LanguageId}' already exists.");
+		AvailableLanguages.Add(language);
 	}
 }

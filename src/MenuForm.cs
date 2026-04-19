@@ -59,7 +59,7 @@ internal sealed partial class MenuForm : Form
 
 	private void OpenUpdaterDialog(object sender, EventArgs e) => new UpdateCheckForm().ShowDialog(this);
 
-	private void ChangeLanguage(object sender, EventArgs e) => Localization.SetLanguage(((Language)languageComboBox.SelectedItem!).LanguageId);
+	private void ChangeLanguage(object sender, EventArgs e) => Localization.SetCurrentLanguage(((Language)languageComboBox.SelectedItem!).LanguageId);
 
 	private void ApplyLocalization()
 	{

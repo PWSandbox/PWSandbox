@@ -3,9 +3,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace PWSandbox;
 
@@ -38,8 +41,43 @@ internal static class Program
 		ApplicationConfiguration.Initialize();
 		Application.SetColorMode(SystemColorMode.System);
 
+		LoadLanguages();
+
 		if (args.Length == 0) Application.Run(new MenuForm());
 		else Application.Run(new ArgumentsApplicationContext(args));
+	}
+
+	private static void LoadLanguages()
+	{
+		string path = Path.Combine(AppContext.BaseDirectory, "localizations");
+
+		if (!Directory.Exists(path)) return;
+		string[] filePaths = Directory.GetFiles(path, "*.xml", SearchOption.AllDirectories);
+
+		foreach (string filePath in filePaths)
+		{
+			try
+			{
+				string rawXml = File.ReadAllText(filePath, Encoding.UTF8);
+				XDocument xml = XDocument.Parse(rawXml);
+				Localization.LoadLanguage(xml);
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(
+					$"""
+					Failed to load localization
+					'{filePath}'.
+					It will be ignored.
+					Details:
+					{e.Message}
+					""",
+					"PWSandbox: Error!",
+					MessageBoxButtons.OK,
+					MessageBoxIcon.Warning
+				);
+			}
+		}
 	}
 
 	private static void HandleUnhandledException(Exception e, bool isResumingAllowed = false)

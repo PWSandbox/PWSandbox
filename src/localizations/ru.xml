@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Localization>
+	<!-- Official Russian translation for PWSandbox v1.6.0 by yarb00 ( https://www.yarb00.dev ) -->
+	<Meta>
+		<LanguageId>ru</LanguageId>
+		<InternationalName>Russian</InternationalName>
+		<SelfName>Русский</SelfName>
+		<IsRightToLeft>false</IsRightToLeft>
+	</Meta>
+	<Strings>
+		<_UnhandledExceptionTitle>PWSandbox: Необработанное исключение...</_UnhandledExceptionTitle>
+		<_UnhandledExceptionResumingNotAllowedText>
+			Возникло необработанное исключение (ошибка).
+
+			\(REPORT_LINK_START)[Сообщить об ошибке]\(REPORT_LINK_END)
+
+			Нажмите кнопку "Закрыть", чтобы выйти из PWSandbox.
+		</_UnhandledExceptionResumingNotAllowedText>
+		<_UnhandledExceptionResumingAllowedText>
+			Возникло необработанное исключение (ошибка).
+				
+			\(REPORT_LINK_START)[Сообщить об ошибке]\(REPORT_LINK_END)
+
+			Нажмите кнопку "Закрыть", чтобы выйти из PWSandbox.
+			Вы также можете нажать кнопку "Продолжить", чтобы попытаться проигнорировать ошибку и вернуться в PWSandbox.
+			Однако нет гарантий, что всё будет работать стабильно или вообще будет работать.
+		</_UnhandledExceptionResumingAllowedText>
+		<_ShowDetailsAction>Показать подробности</_ShowDetailsAction>
+		<_HideDetailsAction>Скрыть подробности</_HideDetailsAction>
+		<_DetailsSection>===== Подробнее: =====</_DetailsSection>
+		<_MapFileSelectionTitle>Выберите карту PWSandbox...</_MapFileSelectionTitle>
+		<_MapFileErrorTitle>Карта PWSandbox: Ошибка!</_MapFileErrorTitle>
+		<_MapFileErrorText>
+			Не удалось загрузить карту.
+			Либо она предназначена для более новой версии PWSandbox, либо содержит ошибки.
+
+			Сообщите создателю карты об этой проблеме.
+			Если карту создали вы и пытаетесь загрузить её в поддерживаемой версии PWSandbox,
+			остаётся только одно: вы допустили ошибку при написании карты. Подробности ниже.
+		</_MapFileErrorText>
+		<_LoadMapAction>Открыть карту...</_LoadMapAction>
+		<_AboutAppAction>О программе</_AboutAppAction>
+		<_CheckForUpdatesAction>Проверить наличие обновлений</_CheckForUpdatesAction>
+		<_LanguageSection>Язык PWSandbox:</_LanguageSection>
+		<_PlayModeTitle>Карта PWSandbox</_PlayModeTitle>
+		<_FinishReachedText>Вы пришли к финишу!</_FinishReachedText>
+		<_MapLoadingStatus>
+			Из \(TOTAL_MAPS) карт:
+			\(SUCCESSFUL_MAPS) успешно загрузились,
+			и \(FAILED_MAPS) из них PWSandbox не смог загрузить.
+		</_MapLoadingStatus>
+		<_MapLoadedSuccessfullyText>
+			Карта "\(MAP)"
+			успешно загружена.
+		</_MapLoadedSuccessfullyText>
+		<_MapLoadingFailedText>
+			Во время загрузки карты "\(MAP)" произошла ошибка:
+			\(ERROR_MESSAGE)
+		</_MapLoadingFailedText>
+		<_DescriptionSection>Описание:</_DescriptionSection>
+		<_DescriptionText>
+			Игра-песочница, написанная на C# с использованием Windows Forms.
+
+			Сайт: \(WEBSITE_LINK)
+		</_DescriptionText>
+		<_LicenseSection>Текст лицензии (на английском):</_LicenseSection>
+		<_VersionText>Версия \(VERSION) (\(BUILD_TYPE), \(COMPILATION_TYPE))</_VersionText>
+		<_OkAction>OK</_OkAction>
+		<_UpdateCheckTitle>Проверка обновлений PWSandbox</_UpdateCheckTitle>
+		<_LatestVersionInfoText>Последняя версия: \(VERSION)</_LatestVersionInfoText>
+		<_CurrentVersionInfoText>Установленная версия: \(VERSION)</_CurrentVersionInfoText>
+		<_SeeUpdateAction>Открыть страницу обновления</_SeeUpdateAction>
+		<_CloseAction>Закрыть</_CloseAction>
+		<_CheckingForUpdatesStatus>Проверка наличия обновлений...</_CheckingForUpdatesStatus>
+		<_ErrorStatus>Ошибка...</_ErrorStatus>
+		<_UpdateAvailableStatus>Доступно обновление...</_UpdateAvailableStatus>
+		<_NoUpdateAvailableStatus>Обновлений нет...</_NoUpdateAvailableStatus>
+		<_CheckingForUpdatesStatusDetails>Получение данных с сервера...</_CheckingForUpdatesStatusDetails>
+		<_ErrorStatusDetails>
+			Во время проверки обновлений произошла ошибка:
+
+			\(ERROR_MESSAGE)
+		</_ErrorStatusDetails>
+		<_UpdateAvailableStatusDetails>Чтобы узнать больше о последнем обновлении PWSandbox, выберите "Открыть страницу обновления".</_UpdateAvailableStatusDetails>
+		<_NoUpdateAvailableStatusDetails>Ура! У вас актуальная версия.</_NoUpdateAvailableStatusDetails>
+	</Strings>
+</Localization>
