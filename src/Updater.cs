@@ -13,6 +13,14 @@ internal static class Updater
 {
 	private const string updateDataLocation = $"{Program.Website}/update/data/client/winforms.pws-update-data.json";
 
+	private readonly static HttpClient httpClient = new();
+
+	static Updater()
+	{
+		httpClient.DefaultRequestHeaders.Accept.Add(new("application/json"));
+		httpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"PWSandbox/{Program.FriendlyVersion} (+{Program.Website})");
+	}
+
 	public static bool? IsUpdateAvailable(UpdateData updateData) => updateData.LatestVersion is null ? null : IsUpdateAvailable(updateData.LatestVersion, Program.Version);
 
 	public static bool IsUpdateAvailable(Version latestVersion, Version installedVersion) =>
@@ -21,10 +29,6 @@ internal static class Updater
 
 	public static async Task<UpdateData> GetUpdateData()
 	{
-		using HttpClient httpClient = new();
-		httpClient.DefaultRequestHeaders.Accept.Add(new("application/json"));
-		httpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"PWSandbox/{Program.FriendlyVersion} (+{Program.Website})");
-
 		string rawUpdateData;
 		try
 		{
