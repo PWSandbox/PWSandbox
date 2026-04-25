@@ -11,7 +11,7 @@ internal readonly record struct UpdateData(Version? LatestVersion, Uri? DetailsU
 
 internal static class Updater
 {
-	private const string updateDataLocation = $"{Program.Website}/update/data/client/winforms.pws-update-data.json";
+	private const string updateDataLocation = $"{Program.Website}/update/data/client/release.pws-update-data.json";
 
 	private readonly static HttpClient httpClient = new();
 
