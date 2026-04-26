@@ -63,24 +63,24 @@ internal sealed partial class PlayForm : Form
 
 		switch (e.KeyCode)
 		{
-			case Keys.W or Keys.Up:
-				if (!IsCollision(playerX, playerY - 1)) playerY -= 1;
+			case Keys.W or Keys.Up when !IsCollision(playerX, playerY - 1):
+				playerY -= 1;
 				break;
 
-			case Keys.S or Keys.Down:
-				if (!IsCollision(playerX, playerY + 1)) playerY += 1;
+			case Keys.S or Keys.Down when !IsCollision(playerX, playerY + 1):
+				playerY += 1;
 				break;
 
-			case Keys.A or Keys.Left:
-				if (!IsCollision(playerX - 1, playerY)) playerX -= 1;
+			case Keys.A or Keys.Left when !IsCollision(playerX - 1, playerY):
+				playerX -= 1;
 				break;
 
-			case Keys.D or Keys.Right:
-				if (!IsCollision(playerX + 1, playerY)) playerX += 1;
+			case Keys.D or Keys.Right when !IsCollision(playerX + 1, playerY):
+				playerX += 1;
 				break;
 
 			default:
-				return;
+				return; // Don't redraw if player position hasn't changed
 		}
 
 		playerPosition = new(playerX, playerY);
