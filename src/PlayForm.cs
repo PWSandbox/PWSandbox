@@ -9,7 +9,7 @@ namespace PWSandbox;
 
 internal readonly record struct Position(int X, int Y);
 
-internal sealed partial class PlayForm : Form
+internal sealed class PlayForm : Form
 {
 	private const int baseDpi = 96;
 	private const int baseCellSize = 16;
@@ -35,7 +35,16 @@ internal sealed partial class PlayForm : Form
 	{
 		mapObjects = map.Objects;
 
-		InitializeComponent();
+		DoubleBuffered = true;
+		FormBorderStyle = FormBorderStyle.FixedSingle;
+		KeyPreview = true;
+		MaximizeBox = false;
+		ShowIcon = false;
+
+		DpiChanged += UpdateScaling;
+		Paint += ProcessMap;
+		KeyDown += OnKeyDown;
+
 		CalculateCellSize();
 		CalculateWindowSize();
 
@@ -47,14 +56,14 @@ internal sealed partial class PlayForm : Form
 
 	private void CalculateWindowSize() => ClientSize = new Size(mapObjects.GetLength(1) * cellSize, mapObjects.GetLength(0) * cellSize);
 
-	private void UpdateScaling(object sender, DpiChangedEventArgs e)
+	private void UpdateScaling(object? sender, DpiChangedEventArgs e)
 	{
 		CalculateCellSize();
 		CalculateWindowSize();
 		Invalidate();
 	}
 
-	private void OnKeyDown(object sender, KeyEventArgs e)
+	private void OnKeyDown(object? sender, KeyEventArgs e)
 	{
 		if (e.KeyCode == Keys.Escape) Close();
 
@@ -88,7 +97,7 @@ internal sealed partial class PlayForm : Form
 		Invalidate();
 	}
 
-	private void ProcessMap(object sender, PaintEventArgs e)
+	private void ProcessMap(object? sender, PaintEventArgs e)
 	{
 		for (int y = 0; y < mapObjects.GetLength(0); y++)
 		{
