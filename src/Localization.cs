@@ -24,9 +24,23 @@ internal readonly record struct Language(string LanguageId, string International
 
 internal static class Localization
 {
-	public static Dictionary<StringId, string> StringById { get; private set; } = LocalizationByLanguageId["en"]; // Mapping of StringId to text for the current language
+	public static IReadOnlyList<Language> AvailableLanguages => availableLanguages; // All loaded languages
 
-	public static List<Language> AvailableLanguages { get; private set; } = [
+	public static IReadOnlyDictionary<StringId, string> StringById { get; private set; } // Mapping of StringId to the translation text for the current language
+
+	public static Language CurrentLanguage { get; private set; }
+
+	public static bool AreStringsRightToLeft => CurrentLanguage.IsRightToLeft;
+
+	public static event EventHandler? LocalizationChanged;
+
+	private const string defaultLanguageId = "en";
+
+#if DEBUG
+	private const string localizationTestText = "أنا اجيب أن أبي. أبي هو يعمل كثيرا و يساعدوني في حياتي. أبي هو لطيف و محبوب. هو يحب أن يساعد الناس هو لا يسكن في بيت.";
+#endif
+
+	private static readonly List<Language> availableLanguages = [
 		new Language
 		{
 			LanguageId = "en",
@@ -45,11 +59,7 @@ internal static class Localization
 #endif
 	];
 
-	public static event EventHandler? LocalizationChanged;
-
-	public static bool AreStringsRightToLeft { get; private set; } = false; // Default language is English
-
-	private static Dictionary<string, Dictionary<StringId, string>> LocalizationByLanguageId => new() // Mappings of StringId to text for every available language
+	private static readonly Dictionary<string, Dictionary<StringId, string>> localizationByLanguageId = new(StringComparer.OrdinalIgnoreCase) // Mappings of StringId to the translation text for every available language
 	{
 		["en"] = new()
 		{
@@ -174,24 +184,35 @@ internal static class Localization
 #endif
 	};
 
-#if DEBUG
-	private const string localizationTestText = "أنا اجيب أن أبي. أبي هو يعمل كثيرا و يساعدوني في حياتي. أبي هو لطيف و محبوب. هو يحب أن يساعد الناس هو لا يسكن في بيت.";
-#endif
+	static Localization()
+	{
+		StringById = localizationByLanguageId[defaultLanguageId];
+		CurrentLanguage = availableLanguages.Find(language => language.LanguageId == defaultLanguageId);
+	}
 
 	public static void SetCurrentLanguage(string languageId)
 	{
-		if (!LocalizationByLanguageId.TryGetValue(languageId, out Dictionary<StringId, string>? localization)) throw new KeyNotFoundException($"Language '{languageId}' is not available.");
+		if (!localizationByLanguageId.TryGetValue(languageId, out Dictionary<StringId, string>? localization)) throw new KeyNotFoundException($"Language with ID '{languageId}' is not available.");
 
 		StringById = localization;
-		AreStringsRightToLeft = AvailableLanguages.Find(language => language.LanguageId == languageId).IsRightToLeft;
+		CurrentLanguage = availableLanguages.Find(language => language.LanguageId == languageId);
 
 		LocalizationChanged?.Invoke(null, EventArgs.Empty);
 	}
 
 	public static void LoadLanguage(XDocument xml)
 	{
+		XElement rootElement = xml.Root ?? throw new FormatException("XML document is empty.");
+
+		XAttribute versionAttribute = rootElement.Attribute("Version") ?? throw new FormatException("'Version' attribute is not found.");
+
+		if (!Version.TryParse(versionAttribute.Value.Trim(), out Version? version))
+			throw new FormatException($"'Version' attribute is invalid (expected version in 'X.Y.Z' format, got '{versionAttribute.Value}').");
+
+		if (new Version(Program.Version.Major, Program.Version.Minor, Program.Version.Build) != new Version(version.Major, version.Minor, version.Build))
+			throw new NotSupportedException($"The specified translation is made for another PWSandbox version ('{version.ToString(3)}').");
+
 		XElement
-			rootElement = xml.Root ?? throw new FormatException("XML document is empty."),
 			metaElement = rootElement.Element("Meta") ?? throw new FormatException("'Meta' section is not found."),
 			stringsElement = rootElement.Element("Strings") ?? throw new FormatException("'Strings' section is not found.");
 
@@ -201,7 +222,8 @@ internal static class Localization
 			selfNameElement = metaElement.Element("SelfName") ?? throw new FormatException("'SelfName' value is not found."),
 			isRightToLeftElement = metaElement.Element("IsRightToLeft") ?? throw new FormatException("'IsRightToLeft' value is not found.");
 
-		if (!bool.TryParse(isRightToLeftElement.Value, out bool isRightToLeft)) throw new FormatException($"'IsRightToLeft' value is invalid (expected 'true' or 'false', got '{isRightToLeftElement.Value}').");
+		if (!bool.TryParse(isRightToLeftElement.Value.Trim(), out bool isRightToLeft))
+			throw new FormatException($"'IsRightToLeft' value is invalid (expected 'true' or 'false', got '{isRightToLeftElement.Value}').");
 
 		Language language = new()
 		{
@@ -215,10 +237,19 @@ internal static class Localization
 		foreach (StringId stringId in Enum.GetValues<StringId>())
 		{
 			XElement? translation = stringsElement.Element($"_{stringId}");
-			localization[stringId] = translation?.Value ?? LocalizationByLanguageId["en"][stringId]; // If string is not translated, use the original English text
+
+			if (translation is null)
+			{
+				localization[stringId] = localizationByLanguageId[defaultLanguageId][stringId];
+				continue;
+			}
+
+			string[] translationLines = translation.Value.Trim().Split('\n');
+			for (int i = 0; i < translationLines.Length; i++) translationLines[i] = translationLines[i].Trim();
+			localization[stringId] = string.Join('\n', translationLines);
 		}
 
-		if (!LocalizationByLanguageId.TryAdd(language.LanguageId, localization)) throw new Exception($"Language with ID '{language.LanguageId}' already exists.");
-		AvailableLanguages.Add(language);
+		if (!localizationByLanguageId.TryAdd(language.LanguageId, localization)) throw new Exception($"Language with ID '{language.LanguageId}' already exists.");
+		availableLanguages.Add(language);
 	}
 }
