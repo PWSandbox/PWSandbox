@@ -27,6 +27,7 @@ internal static class Program
 
 	public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version ?? throw new UnreachableException("Assembly version can't be null.");
 	public static readonly string FriendlyVersion = Version.ToString(3);
+	public static readonly string FullVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? throw new UnreachableException("Assembly informational version can't be null.");
 
 	[STAThread]
 	public static void Main(string[] args)

@@ -30,16 +30,16 @@ internal sealed partial class UpdateCheckForm : Form
 		{
 			UpdateData updateData = await Updater.GetUpdateData();
 			isUpdateAvailable = Updater.IsUpdateAvailable(updateData) ?? false;
-			latestVersion = updateData.LatestVersion ?? throw new FormatException("The update data sent by server is not valid (version field not found).");
+			latestVersion = updateData.LatestVersion ?? throw new FormatException("The update data sent by server is not valid (version field is not found).");
 			this.latestVersion = latestVersion.ToString(3);
 			updateUrl = updateData.DetailsUrl?.ToString() ?? string.Empty;
 		}
-		catch (Exception ex)
+		catch (Exception exception)
 		{
 			updateCheckStatus = StringId.ErrorStatus;
 			updateCheckDetails = StringId.ErrorStatusDetails;
 
-			errorMessage = ex.ToString();
+			errorMessage = exception.ToString();
 
 			ApplyLocalization();
 

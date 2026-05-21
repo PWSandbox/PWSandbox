@@ -13,7 +13,7 @@ internal static class Updater
 {
 	private const string updateDataLocation = $"{Program.Website}/update/data/client/release.pws-update-data.json";
 
-	private readonly static HttpClient httpClient = new();
+	private static readonly HttpClient httpClient = new();
 
 	static Updater()
 	{
@@ -29,29 +29,13 @@ internal static class Updater
 
 	public static async Task<UpdateData> GetUpdateData()
 	{
-		string rawUpdateData;
-		try
-		{
-			rawUpdateData = await httpClient.GetStringAsync(updateDataLocation);
-		}
-		catch
-		{
-			throw;
-		}
+		string rawUpdateData = await httpClient.GetStringAsync(updateDataLocation);
 
-		JsonElement updateData;
-		try
+		JsonElement updateData = JsonDocument.Parse(rawUpdateData, new JsonDocumentOptions
 		{
-			updateData = JsonDocument.Parse(rawUpdateData, new JsonDocumentOptions
-			{
-				AllowTrailingCommas = true,
-				CommentHandling = JsonCommentHandling.Skip
-			}).RootElement;
-		}
-		catch
-		{
-			throw;
-		}
+			AllowTrailingCommas = true,
+			CommentHandling = JsonCommentHandling.Skip
+		}).RootElement;
 
 		return new UpdateData
 		{

@@ -33,18 +33,7 @@ internal static class MapParser
 	/// <returns>A <see cref="Map" /> parsed from the file.</returns>
 	/// <exception cref="FormatException">Thrown when the provided map is empty, its version could not be detected or it is incorrect and cannot be parsed.</exception>
 	/// <exception cref="NotSupportedException">Thrown when the version of the provided map is not supported.</exception>
-	public static Map ParseMapFromFile(string filePath, MapVersion? mapVersion = null)
-	{
-		try
-		{
-			string[] mapLines = File.ReadAllLines(filePath, Encoding.UTF8);
-			return ParseMapFromStringArray(mapLines, mapVersion);
-		}
-		catch
-		{
-			throw;
-		}
-	}
+	public static Map ParseMapFromFile(string filePath, MapVersion? mapVersion = null) => ParseMapFromStringArray(File.ReadAllLines(filePath, Encoding.UTF8), mapVersion);
 
 	/// <summary>
 	/// Parses the provided map and creates a new <see cref="Map" /> object from it.
@@ -58,31 +47,14 @@ internal static class MapParser
 	{
 		if (mapLines.Length == 0) throw new FormatException("Map cannot be empty.");
 
-		if (mapVersion is null)
-		{
-			try
-			{
-				mapVersion = DetectMapVersionFromStringArray(mapLines);
-			}
-			catch
-			{
-				throw;
-			}
-		}
+		mapVersion ??= DetectMapVersionFromStringArray(mapLines);
 
-		try
+		return mapVersion switch
 		{
-			return mapVersion switch
-			{
-				MapVersion.V1_0 => ParseMapV1_0(mapLines),
-				MapVersion.V1_1 => ParseMapV1_1(mapLines),
-				_ => throw new NotSupportedException($"Map version '{mapVersion}' is not supported by this version of PWSandbox.")
-			};
-		}
-		catch
-		{
-			throw;
-		}
+			MapVersion.V1_0 => ParseMapV1_0(mapLines),
+			MapVersion.V1_1 => ParseMapV1_1(mapLines),
+			_ => throw new NotSupportedException($"Map version '{mapVersion}' is not supported by this version of PWSandbox.")
+		};
 	}
 
 	/// <summary>
@@ -98,8 +70,8 @@ internal static class MapParser
 	{
 		if (mapLines.Length == 0) throw new FormatException("Map cannot be empty.");
 
-		if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.0;", true, null)) return MapVersion.V1_0;
-		else if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.1;", true, null)) return MapVersion.V1_1;
+		if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.0;", StringComparison.OrdinalIgnoreCase)) return MapVersion.V1_0;
+		else if (mapLines[0].TrimStart().StartsWith("?PWSandbox-Map 1.1;", StringComparison.OrdinalIgnoreCase)) return MapVersion.V1_1;
 		else throw new FormatException("Failed to detect map version.");
 	}
 
@@ -113,14 +85,14 @@ internal static class MapParser
 		{
 			string mapHeader = legacyBehavior ? "?PWSandbox-Map 1.0;" : "?PWSandbox-Map 1.1;";
 
-			mapLines = mapLines.Where(@string => !string.IsNullOrWhiteSpace(@string)).ToArray();
+			mapLines = mapLines.Where(static @string => !string.IsNullOrWhiteSpace(@string)).ToArray();
 
 			if (mapLines.Length == 0) throw new FormatException($"Map cannot be empty.");
 
 			switch (y)
 			{
 				case 0:
-					if (mapLines[0].TrimStart().StartsWith(mapHeader, true, null))
+					if (mapLines[0].TrimStart().StartsWith(mapHeader, StringComparison.OrdinalIgnoreCase))
 					{
 						mapLines[0] = mapLines[0].TrimStart().Remove(0, mapHeader.Length);
 						continue;
@@ -128,7 +100,7 @@ internal static class MapParser
 					else throw new FormatException($"Map header ('{mapHeader}') was not found.");
 
 				case 1:
-					if (mapLines[0].TrimStart().StartsWith("(map: begin)", true, null))
+					if (mapLines[0].TrimStart().StartsWith("(map: begin)", StringComparison.OrdinalIgnoreCase))
 					{
 						mapLines[0] = mapLines[0].TrimStart().Remove(0, "(map: begin)".Length);
 						continue;
@@ -136,15 +108,16 @@ internal static class MapParser
 					else throw new FormatException($"Expected '(map: begin)' after map header ('{mapHeader}'), but it was not found.");
 
 				case 2:
-					if (mapLines[^1].TrimEnd().EndsWith("(map: end)", true, null))
+					if (mapLines[^1].TrimEnd().EndsWith("(map: end)", StringComparison.OrdinalIgnoreCase))
 					{
 						mapLines[^1] = mapLines[^1].TrimEnd().Remove(mapLines[^1].Length - "(map: end)".Length, "(map: end)".Length);
-						mapLines = mapLines.Where(@string => !string.IsNullOrWhiteSpace(@string)).ToArray();
 						break;
 					}
 					else throw new FormatException($"Expected '(map: end)' in the end, but it was not found.");
 			}
 		}
+
+		mapLines = mapLines.Where(static @string => !string.IsNullOrWhiteSpace(@string)).ToArray();
 
 		int maxX = 0;
 		for (int y = 0; y < mapLines.Length; y++)

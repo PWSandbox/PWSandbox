@@ -1,6 +1,7 @@
 // https://pws.yarb00.dev
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Xml.Linq;
 
@@ -59,9 +60,9 @@ internal static class Localization
 #endif
 	];
 
-	private static readonly Dictionary<string, Dictionary<StringId, string>> localizationByLanguageId = new(StringComparer.OrdinalIgnoreCase) // Mappings of StringId to the translation text for every available language
+	private static readonly Dictionary<string, FrozenDictionary<StringId, string>> localizationByLanguageId = new(StringComparer.OrdinalIgnoreCase) // Mappings of StringId to the translation text for every available language
 	{
-		["en"] = new()
+		["en"] = new Dictionary<StringId, string>()
 		{
 			[StringId.UnhandledExceptionTitle] = "PWSandbox: Unhandled exception!",
 			[StringId.UnhandledExceptionResumingNotAllowedText] = """
@@ -140,9 +141,9 @@ internal static class Localization
 				""",
 			[StringId.UpdateAvailableStatusDetails] = "To see more info about the new PWSandbox update, press the \"View update\" button.",
 			[StringId.NoUpdateAvailableStatusDetails] = "Congratulations! You're using the latest version."
-		},
+		}.ToFrozenDictionary(),
 #if DEBUG
-		["test"] = new()
+		["test"] = new Dictionary<StringId, string>()
 		{
 			[StringId.UnhandledExceptionTitle] = localizationTestText,
 			[StringId.UnhandledExceptionResumingNotAllowedText] = "\\(REPORT_LINK_START)!!!\\(REPORT_LINK_END)",
@@ -180,7 +181,7 @@ internal static class Localization
 			[StringId.ErrorStatusDetails] = "\\(ERROR_MESSAGE)",
 			[StringId.UpdateAvailableStatusDetails] = localizationTestText,
 			[StringId.NoUpdateAvailableStatusDetails] = localizationTestText
-		}
+		}.ToFrozenDictionary()
 #endif
 	};
 
@@ -192,7 +193,7 @@ internal static class Localization
 
 	public static void SetCurrentLanguage(string languageId)
 	{
-		if (!localizationByLanguageId.TryGetValue(languageId, out Dictionary<StringId, string>? localization)) throw new KeyNotFoundException($"Language with ID '{languageId}' is not available.");
+		if (!localizationByLanguageId.TryGetValue(languageId, out FrozenDictionary<StringId, string>? localization)) throw new KeyNotFoundException($"Language with ID '{languageId}' is not available.");
 
 		StringById = localization;
 		CurrentLanguage = availableLanguages.Find(language => language.LanguageId == languageId);
@@ -249,7 +250,7 @@ internal static class Localization
 			localization[stringId] = string.Join('\n', translationLines);
 		}
 
-		if (!localizationByLanguageId.TryAdd(language.LanguageId, localization)) throw new Exception($"Language with ID '{language.LanguageId}' already exists.");
+		if (!localizationByLanguageId.TryAdd(language.LanguageId, localization.ToFrozenDictionary())) throw new Exception($"Language with ID '{language.LanguageId}' already exists.");
 		availableLanguages.Add(language);
 	}
 }

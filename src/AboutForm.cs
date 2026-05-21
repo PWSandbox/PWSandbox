@@ -41,7 +41,7 @@ internal sealed partial class AboutForm : Form
 		licenseLabel.Text = Localization.StringById[StringId.LicenseSection];
 		licenseRichTextBox.Text = Program.License; // Not localized on purpose
 		appVersionLabel.Text = Localization.StringById[StringId.VersionText]
-			.Replace("\\(VERSION)", Program.FriendlyVersion)
+			.Replace("\\(VERSION)", Program.FullVersion)
 			.Replace("\\(BUILD_TYPE)", buildType)
 			.Replace("\\(COMPILATION_TYPE)", compilationType);
 		okButton.Text = Localization.StringById[StringId.OkAction];

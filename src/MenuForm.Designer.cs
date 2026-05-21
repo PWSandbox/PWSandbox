@@ -139,7 +139,7 @@ partial class MenuForm
 		AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 		ClientSize = new System.Drawing.Size(264, 321);
 		Controls.Add(tableLayoutPanel);
-		FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+		FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 		MaximizeBox = false;
 		MinimumSize = new System.Drawing.Size(280, 360);
 		Name = "MenuForm";

@@ -15,12 +15,8 @@ internal sealed partial class MenuForm : Form
 		ApplyLocalization();
 		Localization.LocalizationChanged += (_, _) => ApplyLocalization();
 
-#if NATIVE_AOT
 		foreach (Language language in Localization.AvailableLanguages) languageComboBox.Items.Add(language);
-		languageComboBox.SelectedIndex = 0;
-#else
-		languageComboBox.DataSource = Localization.AvailableLanguages;
-#endif
+		languageComboBox.SelectedIndex = languageComboBox.Items.IndexOf(Localization.CurrentLanguage);
 	}
 
 	private void LoadMap(object sender, EventArgs e)
@@ -32,7 +28,7 @@ internal sealed partial class MenuForm : Form
 		{
 			map = MapParser.ParseMapFromFile(openFileDialog.FileName);
 		}
-		catch (Exception ex) when (ex is FormatException or NotSupportedException)
+		catch (Exception exception) when (exception is FormatException or NotSupportedException)
 		{
 			MessageBox.Show(
 				this,
@@ -40,7 +36,7 @@ internal sealed partial class MenuForm : Form
 				{Localization.StringById[StringId.MapFileErrorText]}
 
 				{Localization.StringById[StringId.DetailsSection]}
-				{ex.Message}
+				{exception.Message}
 				""",
 				Localization.StringById[StringId.MapFileErrorTitle],
 				MessageBoxButtons.OK,

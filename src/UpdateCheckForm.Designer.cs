@@ -151,7 +151,7 @@ partial class UpdateCheckForm
 		CancelButton = closeButton;
 		ClientSize = new System.Drawing.Size(464, 321);
 		Controls.Add(tableLayoutPanel);
-		FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+		FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 		MaximizeBox = false;
 		MinimumSize = new System.Drawing.Size(480, 360);
 		Name = "UpdateCheckForm";

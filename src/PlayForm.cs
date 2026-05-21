@@ -1,6 +1,7 @@
 // https://pws.yarb00.dev
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -14,7 +15,7 @@ internal sealed class PlayForm : Form
 	private const int baseDpi = 96;
 	private const int baseCellSize = 16;
 
-	private static readonly Dictionary<MapObject, Color> ColorByMapObject = new()
+	private static readonly FrozenDictionary<MapObject, Color> ColorByMapObject = new Dictionary<MapObject, Color>()
 	{
 		[MapObject.Unknown] = Color.Magenta,
 		[MapObject.Void] = Color.Gray,
@@ -23,7 +24,7 @@ internal sealed class PlayForm : Form
 		[MapObject.Wall] = Color.Silver,
 		[MapObject.FakeWall] = Color.Silver, // Same color as Wall
 		[MapObject.Barrier] = Color.Gray // Same color as Void
-	};
+	}.ToFrozenDictionary();
 
 	private readonly MapObject[,] mapObjects;
 
@@ -72,19 +73,19 @@ internal sealed class PlayForm : Form
 
 		switch (e.KeyCode)
 		{
-			case Keys.W or Keys.Up when !IsCollision(playerX, playerY - 1):
+			case Keys.Up or Keys.W when !IsCollision(playerX, playerY - 1):
 				playerY -= 1;
 				break;
 
-			case Keys.S or Keys.Down when !IsCollision(playerX, playerY + 1):
+			case Keys.Down or Keys.S when !IsCollision(playerX, playerY + 1):
 				playerY += 1;
 				break;
 
-			case Keys.A or Keys.Left when !IsCollision(playerX - 1, playerY):
+			case Keys.Left or Keys.A when !IsCollision(playerX - 1, playerY):
 				playerX -= 1;
 				break;
 
-			case Keys.D or Keys.Right when !IsCollision(playerX + 1, playerY):
+			case Keys.Right or Keys.D when !IsCollision(playerX + 1, playerY):
 				playerX += 1;
 				break;
 
