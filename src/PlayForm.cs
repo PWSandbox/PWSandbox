@@ -1,174 +1,173 @@
-// This file is a part of PWSandbox ( https://github.com/PWSandbox/PWSandbox )
-// PWSandbox is licensed under the MIT (Expat) License:
-
-/* MIT License
- *
- * Copyright (c) 2024 - 2025 yarb00
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+// https://pws.yarb00.dev
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
 namespace PWSandbox;
 
-public partial class PlayForm : Form
+internal readonly record struct Position(int X, int Y);
+
+internal sealed class PlayForm : Form
 {
+	private const int baseDpi = 96;
+	private const int baseCellSize = 16;
+
+	private static readonly FrozenDictionary<MapObject, Color> ColorByMapObject = new Dictionary<MapObject, Color>()
+	{
+		[MapObject.Unknown] = Color.Magenta,
+		[MapObject.Void] = Color.Gray,
+		[MapObject.Player] = Color.Yellow,
+		[MapObject.Finish] = Color.Green,
+		[MapObject.Wall] = Color.Silver,
+		[MapObject.FakeWall] = Color.Silver, // Same color as Wall
+		[MapObject.Barrier] = Color.Gray // Same color as Void
+	}.ToFrozenDictionary();
+
 	private readonly MapObject[,] mapObjects;
 
-	private (int x, int y)? playerPosition = null, lastFinish = null;
+	private Position? playerPosition = null, lastFinish = null;
 
-	private const int cellSize = 20;
+	private int cellSize;
 
-	private readonly Dictionary<MapObject, Color> ColorByMapObject = new()
+	public PlayForm(Map map)
 	{
-		{ MapObject.Unknown, Color.Magenta },
-		{ MapObject.Void, Color.Gray },
-		{ MapObject.Player, Color.Yellow },
-		{ MapObject.Finish, Color.Green },
-		{ MapObject.Wall, Color.Silver },
-		{ MapObject.FakeWall, Color.Silver }, // Same color as Wall
-		{ MapObject.Barrier, Color.Gray } // Same color as Void
-	};
+		mapObjects = map.Objects;
 
-	public PlayForm(MapObject[,] mapObjects, Dictionary<MapObject, Color>? colorByMapObject = null)
-	{
-		InitializeComponent();
+		DoubleBuffered = true;
+		FormBorderStyle = FormBorderStyle.FixedSingle;
+		KeyPreview = true;
+		MaximizeBox = false;
+		ShowIcon = false;
 
-		this.mapObjects = mapObjects;
+		DpiChanged += UpdateScaling;
+		Paint += ProcessMap;
+		KeyDown += OnKeyDown;
 
-		ClientSize = new Size(mapObjects.GetLength(1) * cellSize, mapObjects.GetLength(0) * cellSize);
+		CalculateCellSize();
+		CalculateWindowSize();
 
-		if (colorByMapObject is null) return;
-
-		foreach (var color in colorByMapObject) ColorByMapObject[color.Key] = color.Value;
-		BackColor = ColorByMapObject[MapObject.Void];
+		ApplyLocalization();
+		Localization.LocalizationChanged += (_, _) => ApplyLocalization();
 	}
 
-	private void OnKeyDown(object sender, KeyEventArgs e)
+	private void CalculateCellSize() => cellSize = (int)float.Ceiling(baseCellSize * ((float)DeviceDpi / baseDpi));
+
+	private void CalculateWindowSize() => ClientSize = new Size(mapObjects.GetLength(1) * cellSize, mapObjects.GetLength(0) * cellSize);
+
+	private void UpdateScaling(object? sender, DpiChangedEventArgs e)
+	{
+		CalculateCellSize();
+		CalculateWindowSize();
+		Invalidate();
+	}
+
+	private void OnKeyDown(object? sender, KeyEventArgs e)
 	{
 		if (e.KeyCode == Keys.Escape) Close();
 
-		if (playerPosition is null ||
-			!new List<Keys>
-			{
-				Keys.W, Keys.Up,
-				Keys.S, Keys.Down,
-				Keys.A, Keys.Left,
-				Keys.D, Keys.Right
-			}.Contains(e.KeyCode)) return;
-
-		(int playerX, int playerY) = ((int, int))playerPosition;
+		if (playerPosition is null) return;
+		(int playerX, int playerY) = (Position)playerPosition;
 
 		switch (e.KeyCode)
 		{
-			case Keys.W or Keys.Up:
-				if (!IsCollision((playerX, playerY - 1))) playerY -= 1;
+			case Keys.Up or Keys.W when !IsCollision(playerX, playerY - 1):
+				playerY -= 1;
 				break;
-			case Keys.S or Keys.Down:
-				if (!IsCollision((playerX, playerY + 1))) playerY += 1;
+
+			case Keys.Down or Keys.S when !IsCollision(playerX, playerY + 1):
+				playerY += 1;
 				break;
-			case Keys.A or Keys.Left:
-				if (!IsCollision((playerX - 1, playerY))) playerX -= 1;
+
+			case Keys.Left or Keys.A when !IsCollision(playerX - 1, playerY):
+				playerX -= 1;
 				break;
-			case Keys.D or Keys.Right:
-				if (!IsCollision((playerX + 1, playerY))) playerX += 1;
+
+			case Keys.Right or Keys.D when !IsCollision(playerX + 1, playerY):
+				playerX += 1;
 				break;
+
+			default:
+				return; // Don't redraw if player position hasn't changed
 		}
 
-		playerPosition = (playerX, playerY);
+		playerPosition = new(playerX, playerY);
 
 		Invalidate();
 	}
 
-	protected override void OnPaint(PaintEventArgs e)
-	{
-		base.OnPaint(e);
-
-		ProcessMap(e.Graphics);
-	}
-
-	private void ProcessMap(Graphics graphics)
+	private void ProcessMap(object? sender, PaintEventArgs e)
 	{
 		for (int y = 0; y < mapObjects.GetLength(0); y++)
+		{
 			for (int x = 0; x < mapObjects.GetLength(1); x++)
+			{
 				switch (mapObjects[y, x])
 				{
 					case MapObject.Player:
-						playerPosition ??= (x, y);
-						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Void]);
+						playerPosition ??= new(x, y);
+						DrawCell(e.Graphics, new(x, y), ColorByMapObject[MapObject.Void]);
 						break;
 
-					case MapObject.Finish:
-						if (playerPosition == (x, y) && lastFinish != (x, y))
-						{
-							MessageBox.Show(
-								"You have reached the finish!",
-								"PWSandbox [Play]",
-								MessageBoxButtons.OK,
-								MessageBoxIcon.Information,
-								MessageBoxDefaultButton.Button1
-							);
-
-							lastFinish = playerPosition;
-						}
-						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[MapObject.Finish]);
-						break;
+					case MapObject.Finish when playerPosition == new Position(x, y) && lastFinish != new Position(x, y):
+						MessageBox.Show(
+							this,
+							Localization.StringById[StringId.FinishReachedText],
+							Localization.StringById[StringId.PlayModeTitle],
+							MessageBoxButtons.OK,
+							MessageBoxIcon.Information,
+							MessageBoxDefaultButton.Button1,
+							Localization.AreStringsRightToLeft ? MessageBoxOptions.RightAlign | MessageBoxOptions.RtlReading : 0
+						);
+						lastFinish = playerPosition;
+						goto default;
 
 					default:
-						DrawCell(graphics, (x, y), cellSize, ColorByMapObject[mapObjects[y, x]]);
+						DrawCell(e.Graphics, new(x, y), ColorByMapObject[mapObjects[y, x]]);
 						break;
 				}
+			}
+		}
 
 		if (playerPosition is null) return;
-		DrawCell(graphics, ((int x, int y))playerPosition, cellSize, ColorByMapObject[MapObject.Player]);
+		DrawCell(e.Graphics, (Position)playerPosition, ColorByMapObject[MapObject.Player]);
 	}
 
-	private static void DrawCell(Graphics graphics, (int x, int y) coordinates, int cellSize, Color color)
+	private void DrawCell(Graphics graphics, Position coordinates, Color color)
 	{
 		using SolidBrush brush = new(color);
 
 		graphics.FillRectangle(
 			brush,
-			coordinates.x * cellSize, coordinates.y * cellSize,
-			cellSize, cellSize
+			x: coordinates.X * cellSize, y: coordinates.Y * cellSize,
+			width: cellSize, height: cellSize
 		);
 	}
 
-	private bool IsCollision((int x, int y) coordinates)
-	{
-		bool isCollision = false;
+	private bool IsCollision(int x, int y) => IsCollision(new(x, y));
 
+	private bool IsCollision(Position coordinates)
+	{
+		MapObject @object;
 		try
 		{
-			if (mapObjects[coordinates.y, coordinates.x] == MapObject.Wall
-			|| mapObjects[coordinates.y, coordinates.x] == MapObject.Barrier)
-				isCollision = true;
+			@object = mapObjects[coordinates.Y, coordinates.X];
 		}
 		catch (IndexOutOfRangeException)
 		{
-			isCollision = true;
+			return true;
 		}
 
-		return isCollision;
+		return @object is MapObject.Wall or MapObject.Barrier;
+	}
+
+	private void ApplyLocalization()
+	{
+		RightToLeft = RightToLeft.No; // RightToLeft should always be No because the map itself will get inverted (including the controls) if it's set to Yes
+		RightToLeftLayout = Localization.AreStringsRightToLeft;
+
+		Text = Localization.StringById[StringId.PlayModeTitle];
 	}
 }

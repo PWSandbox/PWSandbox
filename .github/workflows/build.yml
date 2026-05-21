@@ -1,0 +1,35 @@
+# https://pws.yarb00.dev
+
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  release:
+    name: Publish (Release)
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.1xx
+          dotnet-quality: ga
+      - name: Build
+        run: dotnet publish -r win-x64
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: PWSandbox_win-x64
+          path: src/bin/Release/net10.0-windows/win-x64/publish
+          if-no-files-found: error

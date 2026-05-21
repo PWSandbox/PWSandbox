@@ -1,17 +1,37 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <OutputType>WinExe</OutputType>
+    <PublishAot Condition="'$(Configuration)' == 'Release'">true</PublishAot>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <VersionPrefix>1.6.0</VersionPrefix>
+
     <UseWindowsForms>true</UseWindowsForms>
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
-    <VersionPrefix>1.5.0</VersionPrefix>
+    <ApplicationVisualStyles>true</ApplicationVisualStyles>
+    <ApplicationUseCompatibleTextRendering>false</ApplicationUseCompatibleTextRendering>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationDefaultFont>Segoe UI, 9pt</ApplicationDefaultFont>
+    <ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
+
+    <AssemblyTitle>PWSandbox</AssemblyTitle>
+    <Copyright>Copyright (c) 2024-2026 yarb00</Copyright>
+    <Product>PWSandbox</Product>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(PublishAot)' == 'true'">
+    <_SuppressWinFormsTrimError>true</_SuppressWinFormsTrimError>
+    <DefineConstants>NATIVE_AOT</DefineConstants>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Octokit" Version="14.0.0" />
+    <Content Include="localizations/**/*.*">
+      <Link>localizations/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

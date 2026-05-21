@@ -1,97 +1,49 @@
-// This file is a part of PWSandbox ( https://github.com/PWSandbox/PWSandbox )
-// PWSandbox is licensed under the MIT (Expat) License:
+// https://pws.yarb00.dev
 
-/* MIT License
- *
- * Copyright (c) 2024 - 2025 yarb00
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace PWSandbox;
 
-public partial class AboutForm : Form
+internal sealed partial class AboutForm : Form
 {
-	public AboutForm(MenuForm? menuForm = null)
+#if DEBUG
+	private const string buildType = "Debug";
+#else
+	private const string buildType = "Release";
+#endif
+
+#if NATIVE_AOT
+	private const string compilationType = "AOT";
+#else
+	private const string compilationType = "JIT";
+#endif
+
+	public AboutForm()
 	{
 		InitializeComponent();
 
-		if (menuForm?.AppVersion is not null) appVersionLabel.Text = $"v{menuForm.AppVersion.ToString(3)}";
-
-		appDescriptionRichTextBox.Text = """
-			Simple sandbox game, built with .NET and Windows Forms.
-
-			You can find the PWSandbox Git repository at https://github.com/PWSandbox/PWSandbox.
-
-			This software is licensed under the MIT (Expat) License. You can find its text below.
-			""";
-
-		appLicenseRichTextBox.Text = """
-			Copyright (c) 2024-2025 yarb00
-
-			Permission is hereby granted, free of charge, to any person obtaining a copy
-			of this software and associated documentation files (the ""Software""), to deal
-			in the Software without restriction, including without limitation the rights
-			to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-			copies of the Software, and to permit persons to whom the Software is
-			furnished to do so, subject to the following conditions:
-
-			The above copyright notice and this permission notice shall be included in all
-			copies or substantial portions of the Software.
-
-			THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-			IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-			FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-			AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-			LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-			OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-			SOFTWARE.
-			""";
-
-		SetTheme(menuForm?.CurrentColorTheme ?? Theme.SimpleDark);
+		ApplyLocalization();
+		Localization.LocalizationChanged += (_, _) => ApplyLocalization();
 	}
 
-	private void OnLinkClick(object sender, LinkClickedEventArgs e)
+	private void OpenLink(object sender, LinkClickedEventArgs e) => Process.Start(new ProcessStartInfo(e.LinkText!) { UseShellExecute = true });
+
+	private void ApplyLocalization()
 	{
-		System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(e.LinkText!) { UseShellExecute = true });
-	}
+		RightToLeft = Localization.AreStringsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
+		RightToLeftLayout = Localization.AreStringsRightToLeft;
 
-	private void SetTheme(Theme colorTheme)
-	{
-		var GuiColor = MenuForm.GuiColor[colorTheme];
-
-		BackColor = GuiColor[ControlColor.Background];
-		ForeColor = GuiColor[ControlColor.Foreground];
-
-		okButton.BackColor =
-		appDescriptionRichTextBox.BackColor =
-		appLicenseRichTextBox.BackColor =
-		GuiColor[ControlColor.ButtonBackground];
-
-		okButton.ForeColor =
-		appDescriptionRichTextBox.ForeColor =
-		appLicenseRichTextBox.ForeColor =
-		GuiColor[ControlColor.ButtonForeground];
-
-		okButton.FlatAppearance.MouseOverBackColor = GuiColor[ControlColor.ButtonHovered];
-		okButton.FlatAppearance.MouseDownBackColor = GuiColor[ControlColor.ButtonClicked];
+		Text = Localization.StringById[StringId.AboutAppAction];
+		descriptionLabel.Text = Localization.StringById[StringId.DescriptionSection];
+		descriptionRichTextBox.Text = Localization.StringById[StringId.DescriptionText]
+			.Replace("\\(WEBSITE_LINK)", Program.Website);
+		licenseLabel.Text = Localization.StringById[StringId.LicenseSection];
+		licenseRichTextBox.Text = Program.License; // Not localized on purpose
+		appVersionLabel.Text = Localization.StringById[StringId.VersionText]
+			.Replace("\\(VERSION)", Program.FullVersion)
+			.Replace("\\(BUILD_TYPE)", buildType)
+			.Replace("\\(COMPILATION_TYPE)", compilationType);
+		okButton.Text = Localization.StringById[StringId.OkAction];
 	}
 }
