@@ -1,6 +1,6 @@
 // https://pws.yarb00.dev
 
-namespace PWSandbox;
+namespace PWSandbox.Gui;
 
 partial class UpdateCheckForm
 {
@@ -26,9 +26,9 @@ partial class UpdateCheckForm
 		closeButton = new System.Windows.Forms.Button();
 		tableLayoutPanel.SuspendLayout();
 		SuspendLayout();
-		// 
+		//
 		// tableLayoutPanel
-		// 
+		//
 		tableLayoutPanel.AutoSize = true;
 		tableLayoutPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 		tableLayoutPanel.ColumnCount = 1;
@@ -53,9 +53,9 @@ partial class UpdateCheckForm
 		tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
 		tableLayoutPanel.Size = new System.Drawing.Size(464, 321);
 		tableLayoutPanel.TabIndex = 0;
-		// 
+		//
 		// updateCheckStatusLabel
-		// 
+		//
 		updateCheckStatusLabel.AutoSize = true;
 		updateCheckStatusLabel.Dock = System.Windows.Forms.DockStyle.Fill;
 		updateCheckStatusLabel.Font = new System.Drawing.Font("Segoe UI", 36F);
@@ -65,9 +65,9 @@ partial class UpdateCheckForm
 		updateCheckStatusLabel.TabIndex = 1;
 		updateCheckStatusLabel.Text = "...";
 		updateCheckStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-		// 
+		//
 		// updateCheckDetailsLabel
-		// 
+		//
 		updateCheckDetailsLabel.AutoSize = true;
 		updateCheckDetailsLabel.Dock = System.Windows.Forms.DockStyle.Fill;
 		updateCheckDetailsLabel.Location = new System.Drawing.Point(3, 64);
@@ -76,9 +76,9 @@ partial class UpdateCheckForm
 		updateCheckDetailsLabel.TabIndex = 2;
 		updateCheckDetailsLabel.Text = "DetailsSection";
 		updateCheckDetailsLabel.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-		// 
+		//
 		// updateCheckDetailsRichTextBox
-		// 
+		//
 		updateCheckDetailsRichTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
 		updateCheckDetailsRichTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
 		updateCheckDetailsRichTextBox.Location = new System.Drawing.Point(3, 83);
@@ -88,9 +88,9 @@ partial class UpdateCheckForm
 		updateCheckDetailsRichTextBox.Size = new System.Drawing.Size(458, 106);
 		updateCheckDetailsRichTextBox.TabIndex = 3;
 		updateCheckDetailsRichTextBox.Text = "";
-		// 
+		//
 		// latestVersionLabel
-		// 
+		//
 		latestVersionLabel.AutoSize = true;
 		latestVersionLabel.Dock = System.Windows.Forms.DockStyle.Fill;
 		latestVersionLabel.Enabled = false;
@@ -101,9 +101,9 @@ partial class UpdateCheckForm
 		latestVersionLabel.Text = "LatestVersionInfoText";
 		latestVersionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 		latestVersionLabel.Visible = false;
-		// 
+		//
 		// currentVersionLabel
-		// 
+		//
 		currentVersionLabel.AutoSize = true;
 		currentVersionLabel.Dock = System.Windows.Forms.DockStyle.Fill;
 		currentVersionLabel.Location = new System.Drawing.Point(3, 224);
@@ -112,9 +112,9 @@ partial class UpdateCheckForm
 		currentVersionLabel.TabIndex = 5;
 		currentVersionLabel.Text = "CurrentVersionInfoText";
 		currentVersionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-		// 
+		//
 		// viewUpdateButton
-		// 
+		//
 		viewUpdateButton.AutoSize = true;
 		viewUpdateButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 		viewUpdateButton.DialogResult = System.Windows.Forms.DialogResult.OK;
@@ -128,9 +128,9 @@ partial class UpdateCheckForm
 		viewUpdateButton.UseVisualStyleBackColor = true;
 		viewUpdateButton.Visible = false;
 		viewUpdateButton.Click += ViewUpdate;
-		// 
+		//
 		// closeButton
-		// 
+		//
 		closeButton.AutoSize = true;
 		closeButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 		closeButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
@@ -141,9 +141,9 @@ partial class UpdateCheckForm
 		closeButton.TabIndex = 7;
 		closeButton.Text = "CloseAction";
 		closeButton.UseVisualStyleBackColor = true;
-		// 
+		//
 		// UpdateCheckForm
-		// 
+		//
 		AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 		AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 		AutoSize = true;

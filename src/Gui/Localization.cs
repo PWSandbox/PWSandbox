@@ -5,8 +5,9 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Xml.Linq;
 
-namespace PWSandbox;
+namespace PWSandbox.Gui;
 
+// csharpier-ignore-start
 internal enum StringId
 {
 	UnhandledExceptionTitle, UnhandledExceptionResumingNotAllowedText, UnhandledExceptionResumingAllowedText, ShowDetailsAction, HideDetailsAction, DetailsSection,
@@ -17,10 +18,16 @@ internal enum StringId
 	CheckingForUpdatesStatus, ErrorStatus, UpdateAvailableStatus, NoUpdateAvailableStatus,
 	CheckingForUpdatesStatusDetails, ErrorStatusDetails, UpdateAvailableStatusDetails, NoUpdateAvailableStatusDetails
 }
+// csharpier-ignore-end
 
-internal readonly record struct Language(string LanguageId, string InternationalName, string SelfName, bool IsRightToLeft)
+internal readonly record struct Language(
+	string Id,
+	string InternationalName,
+	string SelfName,
+	bool IsRightToLeft
+)
 {
-	public override string ToString() => $"[{LanguageId}] {InternationalName} ({SelfName})";
+	public override string ToString() => $"[{Id}] {InternationalName} ({SelfName})";
 }
 
 internal static class Localization
@@ -38,29 +45,35 @@ internal static class Localization
 	private const string defaultLanguageId = "en";
 
 #if DEBUG
-	private const string localizationTestText = "أنا اجيب أن أبي. أبي هو يعمل كثيرا و يساعدوني في حياتي. أبي هو لطيف و محبوب. هو يحب أن يساعد الناس هو لا يسكن في بيت.";
+	private const string localizationTestText =
+		"أنا اجيب أن أبي. أبي هو يعمل كثيرا و يساعدوني في حياتي. أبي هو لطيف و محبوب. هو يحب أن يساعد الناس هو لا يسكن في بيت.";
 #endif
 
-	private static readonly List<Language> availableLanguages = [
+	private static readonly List<Language> availableLanguages =
+	[
 		new Language
 		{
-			LanguageId = "en",
+			Id = "en",
 			InternationalName = "English",
 			SelfName = "English",
-			IsRightToLeft = false
+			IsRightToLeft = false,
 		},
 #if DEBUG
 		new Language
 		{
-			LanguageId = "test",
+			Id = "test",
 			InternationalName = "Localization test",
 			SelfName = "🧪",
-			IsRightToLeft = true
+			IsRightToLeft = true,
 		}
 #endif
 	];
 
-	private static readonly Dictionary<string, FrozenDictionary<StringId, string>> localizationByLanguageId = new(StringComparer.OrdinalIgnoreCase) // Mappings of StringId to the translation text for every available language
+	// csharpier-ignore-start
+	private static readonly Dictionary<
+		string,
+		FrozenDictionary<StringId, string>
+	> localizationByLanguageId = new(StringComparer.OrdinalIgnoreCase) // Mappings of StringId to the translation text for every available language
 	{
 		["en"] = new Dictionary<StringId, string>()
 		{
@@ -140,7 +153,7 @@ internal static class Localization
 				\(ERROR_MESSAGE)
 				""",
 			[StringId.UpdateAvailableStatusDetails] = "To see more info about the new PWSandbox update, press the \"View update\" button.",
-			[StringId.NoUpdateAvailableStatusDetails] = "Congratulations! You're using the latest version."
+			[StringId.NoUpdateAvailableStatusDetails] = "Congratulations! You're using the latest version.",
 		}.ToFrozenDictionary(),
 #if DEBUG
 		["test"] = new Dictionary<StringId, string>()
@@ -180,23 +193,30 @@ internal static class Localization
 			[StringId.CheckingForUpdatesStatusDetails] = localizationTestText,
 			[StringId.ErrorStatusDetails] = "\\(ERROR_MESSAGE)",
 			[StringId.UpdateAvailableStatusDetails] = localizationTestText,
-			[StringId.NoUpdateAvailableStatusDetails] = localizationTestText
+			[StringId.NoUpdateAvailableStatusDetails] = localizationTestText,
 		}.ToFrozenDictionary()
 #endif
 	};
+	// csharpier-ignore-end
 
 	static Localization()
 	{
 		StringById = localizationByLanguageId[defaultLanguageId];
-		CurrentLanguage = availableLanguages.Find(language => language.LanguageId == defaultLanguageId);
+		CurrentLanguage = availableLanguages.Find(language => language.Id == defaultLanguageId);
 	}
 
 	public static void SetCurrentLanguage(string languageId)
 	{
-		if (!localizationByLanguageId.TryGetValue(languageId, out FrozenDictionary<StringId, string>? localization)) throw new KeyNotFoundException($"Language with ID '{languageId}' is not available.");
+		if (
+			!localizationByLanguageId.TryGetValue(
+				languageId,
+				out FrozenDictionary<StringId, string>? localization
+			)
+		)
+			throw new KeyNotFoundException($"Language with ID '{languageId}' is not available.");
 
 		StringById = localization;
-		CurrentLanguage = availableLanguages.Find(language => language.LanguageId == languageId);
+		CurrentLanguage = availableLanguages.Find(language => language.Id == languageId);
 
 		LocalizationChanged?.Invoke(null, EventArgs.Empty);
 	}
@@ -205,33 +225,58 @@ internal static class Localization
 	{
 		XElement rootElement = xml.Root ?? throw new FormatException("XML document is empty.");
 
-		XAttribute versionAttribute = rootElement.Attribute("Version") ?? throw new FormatException("'Version' attribute is not found.");
+		XAttribute versionAttribute =
+			rootElement.Attribute("Version")
+			?? throw new FormatException("'Version' attribute is not found.");
 
 		if (!Version.TryParse(versionAttribute.Value.Trim(), out Version? version))
-			throw new FormatException($"'Version' attribute is invalid (expected version in 'X.Y.Z' format, got '{versionAttribute.Value}').");
+			throw new FormatException(
+				$"'Version' attribute is invalid (expected version in 'X.Y.Z' format, got '{versionAttribute.Value}')."
+			);
 
-		if (new Version(Program.Version.Major, Program.Version.Minor, Program.Version.Build) != new Version(version.Major, version.Minor, version.Build))
-			throw new NotSupportedException($"The specified translation is made for another PWSandbox version ('{version.ToString(3)}').");
+		if (
+			new Version(Program.Version.Major, Program.Version.Minor, Program.Version.Build)
+			!= new Version(version.Major, version.Minor, version.Build)
+		)
+			throw new NotSupportedException(
+				$"The specified translation is made for another PWSandbox version ('{version.ToString(3)}')."
+			);
 
+		// csharpier-ignore
 		XElement
-			metaElement = rootElement.Element("Meta") ?? throw new FormatException("'Meta' section is not found."),
-			stringsElement = rootElement.Element("Strings") ?? throw new FormatException("'Strings' section is not found.");
+			metaElement =
+				rootElement.Element("Meta")
+				?? throw new FormatException("'Meta' section is not found."),
+			stringsElement =
+				rootElement.Element("Strings")
+				?? throw new FormatException("'Strings' section is not found.");
 
+		// csharpier-ignore
 		XElement
-			languageIdElement = metaElement.Element("LanguageId") ?? throw new FormatException("'LanguageId' value is not found."),
-			internationalNameElement = metaElement.Element("InternationalName") ?? throw new FormatException("'InternationalName' value is not found."),
-			selfNameElement = metaElement.Element("SelfName") ?? throw new FormatException("'SelfName' value is not found."),
-			isRightToLeftElement = metaElement.Element("IsRightToLeft") ?? throw new FormatException("'IsRightToLeft' value is not found.");
+			languageIdElement =
+				metaElement.Element("LanguageId")
+				?? throw new FormatException("'LanguageId' value is not found."),
+			internationalNameElement =
+				metaElement.Element("InternationalName")
+				?? throw new FormatException("'InternationalName' value is not found."),
+			selfNameElement =
+				metaElement.Element("SelfName")
+				?? throw new FormatException("'SelfName' value is not found."),
+			isRightToLeftElement =
+				metaElement.Element("IsRightToLeft")
+				?? throw new FormatException("'IsRightToLeft' value is not found.");
 
 		if (!bool.TryParse(isRightToLeftElement.Value.Trim(), out bool isRightToLeft))
-			throw new FormatException($"'IsRightToLeft' value is invalid (expected 'true' or 'false', got '{isRightToLeftElement.Value}').");
+			throw new FormatException(
+				$"'IsRightToLeft' value is invalid (expected 'true' or 'false', got '{isRightToLeftElement.Value}')."
+			);
 
 		Language language = new()
 		{
-			LanguageId = languageIdElement.Value.Trim(),
+			Id = languageIdElement.Value.Trim(),
 			InternationalName = internationalNameElement.Value.Trim(),
 			SelfName = selfNameElement.Value.Trim(),
-			IsRightToLeft = isRightToLeft
+			IsRightToLeft = isRightToLeft,
 		};
 
 		Dictionary<StringId, string> localization = [];
@@ -246,11 +291,14 @@ internal static class Localization
 			}
 
 			string[] translationLines = translation.Value.Trim().Split('\n');
-			for (int i = 0; i < translationLines.Length; i++) translationLines[i] = translationLines[i].Trim();
+			for (int i = 0; i < translationLines.Length; i++)
+				translationLines[i] = translationLines[i].Trim();
 			localization[stringId] = string.Join('\n', translationLines);
 		}
 
-		if (!localizationByLanguageId.TryAdd(language.LanguageId, localization.ToFrozenDictionary())) throw new Exception($"Language with ID '{language.LanguageId}' already exists.");
+		if (!localizationByLanguageId.TryAdd(language.Id, localization.ToFrozenDictionary()))
+			throw new Exception($"Language with ID '{language.Id}' already exists.");
+
 		availableLanguages.Add(language);
 	}
 }

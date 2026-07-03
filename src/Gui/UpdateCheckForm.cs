@@ -4,12 +4,20 @@ using System;
 using System.Diagnostics;
 using System.Windows.Forms;
 
-namespace PWSandbox;
+namespace PWSandbox.Gui;
 
 internal sealed partial class UpdateCheckForm : Form
 {
-	private string latestVersion = string.Empty, updateUrl = string.Empty, errorMessage = string.Empty;
-	private StringId updateCheckStatus = StringId.CheckingForUpdatesStatus, updateCheckDetails = StringId.CheckingForUpdatesStatusDetails;
+	// csharpier-ignore
+	private string
+		latestVersion = string.Empty,
+		updateUrl = string.Empty,
+		errorMessage = string.Empty;
+
+	// csharpier-ignore
+	private StringId
+		updateCheckStatus = StringId.CheckingForUpdatesStatus,
+		updateCheckDetails = StringId.CheckingForUpdatesStatusDetails;
 
 	public UpdateCheckForm()
 	{
@@ -19,7 +27,8 @@ internal sealed partial class UpdateCheckForm : Form
 		Localization.LocalizationChanged += (_, _) => ApplyLocalization();
 	}
 
-	private void ViewUpdate(object sender, EventArgs e) => Process.Start(new ProcessStartInfo(updateUrl) { UseShellExecute = true });
+	private void ViewUpdate(object sender, EventArgs e) =>
+		Process.Start(new ProcessStartInfo(updateUrl) { UseShellExecute = true });
 
 	private async void CheckForUpdates(object sender, EventArgs e)
 	{
@@ -30,7 +39,11 @@ internal sealed partial class UpdateCheckForm : Form
 		{
 			UpdateData updateData = await Updater.GetUpdateData();
 			isUpdateAvailable = Updater.IsUpdateAvailable(updateData) ?? false;
-			latestVersion = updateData.LatestVersion ?? throw new FormatException("The update data sent by server is not valid (version field is not found).");
+			latestVersion =
+				updateData.LatestVersion
+				?? throw new FormatException(
+					"The update data sent by server is not valid (version field is not found)."
+				);
 			this.latestVersion = latestVersion.ToString(3);
 			updateUrl = updateData.DetailsUrl?.ToString() ?? string.Empty;
 		}
@@ -71,11 +84,14 @@ internal sealed partial class UpdateCheckForm : Form
 		Text = Localization.StringById[StringId.UpdateCheckTitle];
 		updateCheckStatusLabel.Text = Localization.StringById[updateCheckStatus];
 		updateCheckDetailsLabel.Text = Localization.StringById[StringId.DetailsSection];
-		updateCheckDetailsRichTextBox.Text = Localization.StringById[updateCheckDetails]
+		updateCheckDetailsRichTextBox.Text = Localization
+			.StringById[updateCheckDetails]
 			.Replace("\\(ERROR_MESSAGE)", errorMessage);
-		latestVersionLabel.Text = Localization.StringById[StringId.LatestVersionInfoText]
+		latestVersionLabel.Text = Localization
+			.StringById[StringId.LatestVersionInfoText]
 			.Replace("\\(VERSION)", latestVersion);
-		currentVersionLabel.Text = Localization.StringById[StringId.CurrentVersionInfoText]
+		currentVersionLabel.Text = Localization
+			.StringById[StringId.CurrentVersionInfoText]
 			.Replace("\\(VERSION)", Program.FriendlyVersion);
 		viewUpdateButton.Text = Localization.StringById[StringId.SeeUpdateAction];
 		closeButton.Text = Localization.StringById[StringId.CloseAction];

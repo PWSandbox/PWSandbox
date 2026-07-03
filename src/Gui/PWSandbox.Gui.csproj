@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <OutputType>WinExe</OutputType>
+    <TargetFramework>$(TargetFramework)-windows</TargetFramework>
     <PublishAot Condition="'$(Configuration)' == 'Release'">true</PublishAot>
-    <TargetFramework>net10.0-windows</TargetFramework>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Product>PWSandbox</Product>
+    <Copyright>Copyright (c) 2024-2026 yarb00</Copyright>
+    <AssemblyTitle>$(Product)</AssemblyTitle>
     <VersionPrefix>1.6.0</VersionPrefix>
+    <RootNamespace>PWSandbox.Gui</RootNamespace>
 
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationVisualStyles>true</ApplicationVisualStyles>
@@ -15,10 +15,6 @@
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ApplicationDefaultFont>Segoe UI, 9pt</ApplicationDefaultFont>
     <ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
-
-    <AssemblyTitle>PWSandbox</AssemblyTitle>
-    <Copyright>Copyright (c) 2024-2026 yarb00</Copyright>
-    <Product>PWSandbox</Product>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(PublishAot)' == 'true'">
@@ -28,10 +24,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="localizations/**/*.*">
-      <Link>localizations/%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+    <ProjectReference Include="../Formats/PWSandbox.Formats.csproj" />
 
+    <Content Include="localizations/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

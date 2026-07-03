@@ -12,24 +12,49 @@ on:
       - master
 
 jobs:
+
   release:
+
     name: Publish (Release)
-    runs-on: windows-2022
+
+    strategy:
+      matrix:
+        os:
+          - runner_name: windows-2022
+            dotnet_rid: win-x64
+
+    runs-on: ${{ matrix.os.runner_name }}
+
+    env:
+      OUTPUT_PATH: artifacts/publish/PWSandbox.Gui/release_${{ matrix.os.dotnet_rid }}
+
     steps:
+
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.1xx
-          dotnet-quality: ga
+          global-json-file: global.json
+
       - name: Build
-        run: dotnet publish -r win-x64
+        run: dotnet publish -r ${{ matrix.os.dotnet_rid }}
+
+      - name: Rename executable (Windows)
+        if: runner.os == 'Windows'
+        run: Rename-Item -Path ${{ env.OUTPUT_PATH }}/PWSandbox.Gui.exe -NewName PWSandbox.exe
+        shell: pwsh
+
+      - name: Rename executable (Other)
+        if: runner.os != 'Windows'
+        run: mv ${{ env.OUTPUT_PATH }}/PWSandbox.Gui ${{ env.OUTPUT_PATH }}/PWSandbox
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: PWSandbox_win-x64
-          path: src/bin/Release/net10.0-windows/win-x64/publish
+          name: PWSandbox_${{ matrix.os.dotnet_rid }}
+          path: ${{ env.OUTPUT_PATH }}
           if-no-files-found: error

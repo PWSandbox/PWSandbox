@@ -1,6 +1,6 @@
 // https://pws.yarb00.dev
 
-namespace PWSandbox;
+namespace PWSandbox.Gui;
 
 partial class MenuForm
 {
@@ -26,9 +26,9 @@ partial class MenuForm
 		openFileDialog = new System.Windows.Forms.OpenFileDialog();
 		tableLayoutPanel.SuspendLayout();
 		SuspendLayout();
-		// 
+		//
 		// tableLayoutPanel
-		// 
+		//
 		tableLayoutPanel.AutoSize = true;
 		tableLayoutPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 		tableLayoutPanel.ColumnCount = 1;
@@ -51,9 +51,9 @@ partial class MenuForm
 		tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
 		tableLayoutPanel.Size = new System.Drawing.Size(264, 321);
 		tableLayoutPanel.TabIndex = 0;
-		// 
+		//
 		// appNameLabel
-		// 
+		//
 		appNameLabel.AutoSize = true;
 		appNameLabel.Dock = System.Windows.Forms.DockStyle.Fill;
 		appNameLabel.Font = new System.Drawing.Font("Consolas", 36F, System.Drawing.FontStyle.Bold);
@@ -63,9 +63,9 @@ partial class MenuForm
 		appNameLabel.TabIndex = 1;
 		appNameLabel.Text = "PWSandbox";
 		appNameLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-		// 
+		//
 		// loadMapButton
-		// 
+		//
 		loadMapButton.AutoSize = true;
 		loadMapButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 		loadMapButton.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -76,9 +76,9 @@ partial class MenuForm
 		loadMapButton.Text = "LoadMapAction";
 		loadMapButton.UseVisualStyleBackColor = true;
 		loadMapButton.Click += LoadMap;
-		// 
+		//
 		// aboutAppButton
-		// 
+		//
 		aboutAppButton.AutoSize = true;
 		aboutAppButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 		aboutAppButton.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -89,9 +89,9 @@ partial class MenuForm
 		aboutAppButton.Text = "AboutAppAction";
 		aboutAppButton.UseVisualStyleBackColor = true;
 		aboutAppButton.Click += OpenAboutAppDialog;
-		// 
+		//
 		// checkForUpdatesButton
-		// 
+		//
 		checkForUpdatesButton.AutoSize = true;
 		checkForUpdatesButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 		checkForUpdatesButton.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -102,9 +102,9 @@ partial class MenuForm
 		checkForUpdatesButton.Text = "CheckForUpdatesAction";
 		checkForUpdatesButton.UseVisualStyleBackColor = true;
 		checkForUpdatesButton.Click += OpenUpdaterDialog;
-		// 
+		//
 		// languageLabel
-		// 
+		//
 		languageLabel.AutoSize = true;
 		languageLabel.Dock = System.Windows.Forms.DockStyle.Fill;
 		languageLabel.Location = new System.Drawing.Point(3, 256);
@@ -113,9 +113,9 @@ partial class MenuForm
 		languageLabel.TabIndex = 5;
 		languageLabel.Text = "LanguageSection";
 		languageLabel.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-		// 
+		//
 		// languageComboBox
-		// 
+		//
 		languageComboBox.Dock = System.Windows.Forms.DockStyle.Fill;
 		languageComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 		languageComboBox.FormattingEnabled = true;
@@ -124,15 +124,15 @@ partial class MenuForm
 		languageComboBox.Size = new System.Drawing.Size(258, 23);
 		languageComboBox.TabIndex = 6;
 		languageComboBox.SelectedIndexChanged += ChangeLanguage;
-		// 
+		//
 		// openFileDialog
-		// 
+		//
 		openFileDialog.DefaultExt = "pws_map";
 		openFileDialog.Filter = "PWSandbox maps|*.pws_map";
 		openFileDialog.Title = "MapFileSelectionTitle";
-		// 
+		//
 		// MenuForm
-		// 
+		//
 		AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 		AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 		AutoSize = true;

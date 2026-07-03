@@ -9,12 +9,14 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using PWSandbox.Formats;
 
-namespace PWSandbox;
+namespace PWSandbox.Gui;
 
 internal static class Program
 {
 	public const string Website = "https://pws.yarb00.dev";
+
 	public const string License = """
 		Copyright (c) 2024-2026 yarb00
 
@@ -25,9 +27,18 @@ internal static class Program
 		THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		""";
 
-	public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version ?? throw new UnreachableException("Assembly version can't be null.");
+	public static readonly Version Version =
+		Assembly.GetExecutingAssembly().GetName().Version
+		?? throw new UnreachableException("Assembly version cannot be null.");
+
 	public static readonly string FriendlyVersion = Version.ToString(3);
-	public static readonly string FullVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? throw new UnreachableException("Assembly informational version can't be null.");
+
+	public static readonly string FullVersion =
+		Assembly
+			.GetExecutingAssembly()
+			.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+			?.InformationalVersion
+		?? throw new UnreachableException("Assembly informational version cannot be null.");
 
 	[STAThread]
 	public static void Main(string[] args)
@@ -35,8 +46,12 @@ internal static class Program
 		if (!Debugger.IsAttached)
 		{
 			Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-			Application.ThreadException += static (_, e) => HandleUnhandledException(e.Exception, true);
-			AppDomain.CurrentDomain.UnhandledException += static (_, e) => HandleUnhandledException((Exception)e.ExceptionObject);
+
+			Application.ThreadException += static (_, e) =>
+				HandleUnhandledException(e.Exception, true);
+
+			AppDomain.CurrentDomain.UnhandledException += static (_, e) =>
+				HandleUnhandledException((Exception)e.ExceptionObject);
 		}
 
 		ApplicationConfiguration.Initialize();
@@ -44,15 +59,19 @@ internal static class Program
 
 		LoadLanguages();
 
-		if (args.Length == 0) Application.Run(new MenuForm());
-		else Application.Run(new ArgumentsApplicationContext(args));
+		if (args.Length == 0)
+			Application.Run(new MenuForm());
+		else
+			Application.Run(new ArgumentsApplicationContext(args));
 	}
 
 	private static void LoadLanguages()
 	{
 		string path = Path.Combine(AppContext.BaseDirectory, "localizations");
 
-		if (!Directory.Exists(path)) return;
+		if (!Directory.Exists(path))
+			return;
+
 		string[] filePaths = Directory.GetFiles(path, "*.xml", SearchOption.AllDirectories);
 
 		foreach (string filePath in filePaths)
@@ -83,6 +102,7 @@ internal static class Program
 
 	private static void HandleUnhandledException(Exception e, bool isResumingAllowed = false)
 	{
+		// csharpier-ignore
 		string
 			issueTitle = $"Unhandled exception: `{e.GetType().Name}`",
 			issueBody = $"""
@@ -103,13 +123,19 @@ internal static class Program
 			issueReportLink = $"{Website}/issue/report/client?title={Uri.EscapeDataString(issueTitle)}&body={Uri.EscapeDataString(issueBody)}",
 			issueReportLinkStart = $"<a href=\"{issueReportLink}\">",
 			issueReportLinkEnd = "</a>",
-			resumingNotAllowedText = Localization.StringById[StringId.UnhandledExceptionResumingNotAllowedText]
-				.Replace("\\(REPORT_LINK_START)", issueReportLinkStart).Replace("\\(REPORT_LINK_END)", issueReportLinkEnd),
-			resumingAllowedText = Localization.StringById[StringId.UnhandledExceptionResumingAllowedText]
-				.Replace("\\(REPORT_LINK_START)", issueReportLinkStart).Replace("\\(REPORT_LINK_END)", issueReportLinkEnd);
+			resumingNotAllowedText = Localization
+				.StringById[StringId.UnhandledExceptionResumingNotAllowedText]
+				.Replace("\\(REPORT_LINK_START)", issueReportLinkStart)
+				.Replace("\\(REPORT_LINK_END)", issueReportLinkEnd),
+			resumingAllowedText = Localization
+				.StringById[StringId.UnhandledExceptionResumingAllowedText]
+				.Replace("\\(REPORT_LINK_START)", issueReportLinkStart)
+				.Replace("\\(REPORT_LINK_END)", issueReportLinkEnd);
 
 		TaskDialogButtonCollection buttons = [TaskDialogButton.Close];
-		if (isResumingAllowed) buttons.Add(TaskDialogButton.Continue);
+
+		if (isResumingAllowed)
+			buttons.Add(TaskDialogButton.Continue);
 
 		TaskDialogPage unhandledExceptionDialog = new()
 		{
@@ -130,23 +156,28 @@ internal static class Program
 				Text = $"""
 					{Localization.StringById[StringId.DetailsSection]}
 					{e}
-					"""
+					""",
 			},
 
-			Text = isResumingAllowed ? resumingAllowedText : resumingNotAllowedText
+			Text = isResumingAllowed ? resumingAllowedText : resumingNotAllowedText,
 		};
 
-		unhandledExceptionDialog.LinkClicked += (_, e) => Process.Start(new ProcessStartInfo(e.LinkHref) { UseShellExecute = true });
+		unhandledExceptionDialog.LinkClicked += (_, e) =>
+			Process.Start(new ProcessStartInfo(e.LinkHref) { UseShellExecute = true });
 
 		TaskDialogButton result = TaskDialog.ShowDialog(unhandledExceptionDialog);
-		if (result == TaskDialogButton.Close) Environment.FailFast("An unhandled exception occurred.", e);
+
+		if (result == TaskDialogButton.Close)
+			Environment.FailFast("An unhandled exception occurred.", e);
 	}
 
 	private class ArgumentsApplicationContext : ApplicationContext
 	{
 		public ArgumentsApplicationContext(string[] filePaths)
 		{
+			// csharpier-ignore
 			int totalMaps = filePaths.Length, successfulMaps = 0, failedMaps = 0;
+
 			List<string> results = [];
 
 			foreach (string filePath in filePaths)
@@ -154,56 +185,71 @@ internal static class Program
 				Map map;
 				try
 				{
-					map = MapParser.ParseMapFromFile(filePath);
+					map = Map.ParseFromFile(filePath);
 				}
-				catch (Exception ex)
+				catch (Exception e)
 				{
 					failedMaps++;
+
 					results.Add(
-						Localization.StringById[StringId.MapLoadingFailedText]
+						Localization
+							.StringById[StringId.MapLoadingFailedText]
 							.Replace("\\(MAP)", filePath)
-							.Replace("\\(ERROR_MESSAGE)", ex.Message)
+							.Replace("\\(ERROR_MESSAGE)", e.Message)
 					);
 
 					continue;
 				}
 
 				successfulMaps++;
-				results.Add(Localization.StringById[StringId.MapLoadedSuccessfullyText].Replace("\\(MAP)", filePath));
+
+				results.Add(
+					Localization
+						.StringById[StringId.MapLoadedSuccessfullyText]
+						.Replace("\\(MAP)", filePath)
+				);
 
 				PlayForm playForm = new(map);
-				playForm.FormClosed += (_, _) => { if (Application.OpenForms.Count == 0) ExitThread(); };
+				playForm.FormClosed += (_, _) =>
+				{
+					if (Application.OpenForms.Count == 0)
+						ExitThread();
+				};
 				playForm.Show();
 			}
 
-			TaskDialog.ShowDialog(new()
-			{
-				Caption = "PWSandbox",
-				Heading = "PWSandbox",
-				Icon = TaskDialogIcon.Information,
-
-				RightToLeftLayout = Localization.AreStringsRightToLeft,
-				SizeToContent = true,
-
-				Buttons = [TaskDialogButton.OK],
-
-				Expander = new TaskDialogExpander
+			TaskDialog.ShowDialog(
+				new()
 				{
-					CollapsedButtonText = Localization.StringById[StringId.ShowDetailsAction],
-					ExpandedButtonText = Localization.StringById[StringId.HideDetailsAction],
-					Text = $"""
+					Caption = "PWSandbox",
+					Heading = "PWSandbox",
+					Icon = TaskDialogIcon.Information,
+
+					RightToLeftLayout = Localization.AreStringsRightToLeft,
+					SizeToContent = true,
+
+					Buttons = [TaskDialogButton.OK],
+
+					Expander = new TaskDialogExpander
+					{
+						CollapsedButtonText = Localization.StringById[StringId.ShowDetailsAction],
+						ExpandedButtonText = Localization.StringById[StringId.HideDetailsAction],
+						Text = $"""
 						{Localization.StringById[StringId.DetailsSection]}
 						{string.Join(Environment.NewLine + Environment.NewLine, results)}
-						"""
-				},
+						""",
+					},
 
-				Text = Localization.StringById[StringId.MapLoadingStatus]
-					.Replace("\\(TOTAL_MAPS)", totalMaps.ToString())
-					.Replace("\\(SUCCESSFUL_MAPS)", successfulMaps.ToString())
-					.Replace("\\(FAILED_MAPS)", failedMaps.ToString())
-			});
+					Text = Localization
+						.StringById[StringId.MapLoadingStatus]
+						.Replace("\\(TOTAL_MAPS)", totalMaps.ToString())
+						.Replace("\\(SUCCESSFUL_MAPS)", successfulMaps.ToString())
+						.Replace("\\(FAILED_MAPS)", failedMaps.ToString()),
+				}
+			);
 
-			if (Application.OpenForms.Count == 0) Environment.Exit(0); // Exit if no maps loaded successfully
+			if (Application.OpenForms.Count == 0)
+				Environment.Exit(0); // Exit if no maps loaded successfully
 		}
 	}
 }

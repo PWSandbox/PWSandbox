@@ -9,9 +9,13 @@ trim_trailing_whitespace = true
 [*.md]
 trim_trailing_whitespace = false
 
-[*.{cs,xml}]
+[*.cs]
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+[*.{cs,json,xml}]
 indent_style = tab
 
-[*.{csproj,slnx,yml}]
+[*.{csproj,slnx,props,yml}]
 indent_style = space
 indent_size = 2

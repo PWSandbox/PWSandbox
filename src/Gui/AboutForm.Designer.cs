@@ -1,6 +1,6 @@
 // https://pws.yarb00.dev
 
-namespace PWSandbox;
+namespace PWSandbox.Gui;
 
 partial class AboutForm
 {
@@ -26,9 +26,9 @@ partial class AboutForm
 		okButton = new System.Windows.Forms.Button();
 		tableLayoutPanel.SuspendLayout();
 		SuspendLayout();
-		// 
+		//
 		// tableLayoutPanel
-		// 
+		//
 		tableLayoutPanel.AutoSize = true;
 		tableLayoutPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 		tableLayoutPanel.ColumnCount = 1;
@@ -53,9 +53,9 @@ partial class AboutForm
 		tableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
 		tableLayoutPanel.Size = new System.Drawing.Size(264, 321);
 		tableLayoutPanel.TabIndex = 0;
-		// 
+		//
 		// appNameLabel
-		// 
+		//
 		appNameLabel.AutoSize = true;
 		appNameLabel.Dock = System.Windows.Forms.DockStyle.Fill;
 		appNameLabel.Font = new System.Drawing.Font("Consolas", 36F, System.Drawing.FontStyle.Bold);
@@ -65,9 +65,9 @@ partial class AboutForm
 		appNameLabel.TabIndex = 1;
 		appNameLabel.Text = "PWSandbox";
 		appNameLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-		// 
+		//
 		// descriptionLabel
-		// 
+		//
 		descriptionLabel.AutoSize = true;
 		descriptionLabel.Dock = System.Windows.Forms.DockStyle.Fill;
 		descriptionLabel.Location = new System.Drawing.Point(3, 64);
@@ -76,9 +76,9 @@ partial class AboutForm
 		descriptionLabel.TabIndex = 2;
 		descriptionLabel.Text = "DescriptionSection";
 		descriptionLabel.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-		// 
+		//
 		// descriptionRichTextBox
-		// 
+		//
 		descriptionRichTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
 		descriptionRichTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
 		descriptionRichTextBox.Location = new System.Drawing.Point(3, 83);
@@ -89,9 +89,9 @@ partial class AboutForm
 		descriptionRichTextBox.TabIndex = 3;
 		descriptionRichTextBox.Text = "";
 		descriptionRichTextBox.LinkClicked += OpenLink;
-		// 
+		//
 		// licenseLabel
-		// 
+		//
 		licenseLabel.AutoSize = true;
 		licenseLabel.Dock = System.Windows.Forms.DockStyle.Fill;
 		licenseLabel.Location = new System.Drawing.Point(3, 160);
@@ -100,9 +100,9 @@ partial class AboutForm
 		licenseLabel.TabIndex = 4;
 		licenseLabel.Text = "LicenseSection";
 		licenseLabel.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-		// 
+		//
 		// licenseRichTextBox
-		// 
+		//
 		licenseRichTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
 		licenseRichTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
 		licenseRichTextBox.Location = new System.Drawing.Point(3, 179);
@@ -112,9 +112,9 @@ partial class AboutForm
 		licenseRichTextBox.Size = new System.Drawing.Size(258, 74);
 		licenseRichTextBox.TabIndex = 5;
 		licenseRichTextBox.Text = "";
-		// 
+		//
 		// appVersionLabel
-		// 
+		//
 		appVersionLabel.AutoSize = true;
 		appVersionLabel.Dock = System.Windows.Forms.DockStyle.Fill;
 		appVersionLabel.Location = new System.Drawing.Point(3, 256);
@@ -123,9 +123,9 @@ partial class AboutForm
 		appVersionLabel.TabIndex = 6;
 		appVersionLabel.Text = "VersionText";
 		appVersionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-		// 
+		//
 		// okButton
-		// 
+		//
 		okButton.AutoSize = true;
 		okButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 		okButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
@@ -136,9 +136,9 @@ partial class AboutForm
 		okButton.TabIndex = 7;
 		okButton.Text = "OkAction";
 		okButton.UseVisualStyleBackColor = true;
-		// 
+		//
 		// AboutForm
-		// 
+		//
 		AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 		AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 		AutoSize = true;

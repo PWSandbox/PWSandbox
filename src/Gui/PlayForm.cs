@@ -5,8 +5,9 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using PWSandbox.Formats;
 
-namespace PWSandbox;
+namespace PWSandbox.Gui;
 
 internal readonly record struct Position(int X, int Y);
 
@@ -15,7 +16,10 @@ internal sealed class PlayForm : Form
 	private const int baseDpi = 96;
 	private const int baseCellSize = 16;
 
-	private static readonly FrozenDictionary<MapObject, Color> ColorByMapObject = new Dictionary<MapObject, Color>()
+	private static readonly FrozenDictionary<MapObject, Color> ColorByMapObject = new Dictionary<
+		MapObject,
+		Color
+	>()
 	{
 		[MapObject.Unknown] = Color.Magenta,
 		[MapObject.Void] = Color.Gray,
@@ -23,12 +27,15 @@ internal sealed class PlayForm : Form
 		[MapObject.Finish] = Color.Green,
 		[MapObject.Wall] = Color.Silver,
 		[MapObject.FakeWall] = Color.Silver, // Same color as Wall
-		[MapObject.Barrier] = Color.Gray // Same color as Void
+		[MapObject.Barrier] = Color.Gray, // Same color as Void
 	}.ToFrozenDictionary();
 
 	private readonly MapObject[,] mapObjects;
 
-	private Position? playerPosition = null, lastFinish = null;
+	// csharpier-ignore
+	private Position?
+		playerPosition = null,
+		lastFinish = null;
 
 	private int cellSize;
 
@@ -53,9 +60,14 @@ internal sealed class PlayForm : Form
 		Localization.LocalizationChanged += (_, _) => ApplyLocalization();
 	}
 
-	private void CalculateCellSize() => cellSize = (int)float.Ceiling(baseCellSize * ((float)DeviceDpi / baseDpi));
+	private void CalculateCellSize() =>
+		cellSize = (int)float.Ceiling(baseCellSize * ((float)DeviceDpi / baseDpi));
 
-	private void CalculateWindowSize() => ClientSize = new Size(mapObjects.GetLength(1) * cellSize, mapObjects.GetLength(0) * cellSize);
+	private void CalculateWindowSize() =>
+		ClientSize = new Size(
+			mapObjects.GetLength(1) * cellSize,
+			mapObjects.GetLength(0) * cellSize
+		);
 
 	private void UpdateScaling(object? sender, DpiChangedEventArgs e)
 	{
@@ -66,9 +78,12 @@ internal sealed class PlayForm : Form
 
 	private void OnKeyDown(object? sender, KeyEventArgs e)
 	{
-		if (e.KeyCode == Keys.Escape) Close();
+		if (e.KeyCode == Keys.Escape)
+			Close();
 
-		if (playerPosition is null) return;
+		if (playerPosition is null)
+			return;
+
 		(int playerX, int playerY) = (Position)playerPosition;
 
 		switch (e.KeyCode)
@@ -77,15 +92,18 @@ internal sealed class PlayForm : Form
 				playerY -= 1;
 				break;
 
-			case Keys.Down or Keys.S when !IsCollision(playerX, playerY + 1):
+			case Keys.Down
+			or Keys.S when !IsCollision(playerX, playerY + 1):
 				playerY += 1;
 				break;
 
-			case Keys.Left or Keys.A when !IsCollision(playerX - 1, playerY):
+			case Keys.Left
+			or Keys.A when !IsCollision(playerX - 1, playerY):
 				playerX -= 1;
 				break;
 
-			case Keys.Right or Keys.D when !IsCollision(playerX + 1, playerY):
+			case Keys.Right
+			or Keys.D when !IsCollision(playerX + 1, playerY):
 				playerX += 1;
 				break;
 
@@ -111,7 +129,9 @@ internal sealed class PlayForm : Form
 						DrawCell(e.Graphics, new(x, y), ColorByMapObject[MapObject.Void]);
 						break;
 
-					case MapObject.Finish when playerPosition == new Position(x, y) && lastFinish != new Position(x, y):
+					case MapObject.Finish
+						when playerPosition == new Position(x, y)
+							&& lastFinish != new Position(x, y):
 						MessageBox.Show(
 							this,
 							Localization.StringById[StringId.FinishReachedText],
@@ -119,7 +139,9 @@ internal sealed class PlayForm : Form
 							MessageBoxButtons.OK,
 							MessageBoxIcon.Information,
 							MessageBoxDefaultButton.Button1,
-							Localization.AreStringsRightToLeft ? MessageBoxOptions.RightAlign | MessageBoxOptions.RtlReading : 0
+							Localization.AreStringsRightToLeft
+								? MessageBoxOptions.RightAlign | MessageBoxOptions.RtlReading
+								: 0
 						);
 						lastFinish = playerPosition;
 						goto default;
@@ -131,7 +153,9 @@ internal sealed class PlayForm : Form
 			}
 		}
 
-		if (playerPosition is null) return;
+		if (playerPosition is null)
+			return;
+
 		DrawCell(e.Graphics, (Position)playerPosition, ColorByMapObject[MapObject.Player]);
 	}
 
@@ -141,8 +165,10 @@ internal sealed class PlayForm : Form
 
 		graphics.FillRectangle(
 			brush,
-			x: coordinates.X * cellSize, y: coordinates.Y * cellSize,
-			width: cellSize, height: cellSize
+			x: coordinates.X * cellSize,
+			y: coordinates.Y * cellSize,
+			width: cellSize,
+			height: cellSize
 		);
 	}
 

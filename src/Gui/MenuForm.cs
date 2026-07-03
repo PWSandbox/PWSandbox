@@ -2,8 +2,9 @@
 
 using System;
 using System.Windows.Forms;
+using PWSandbox.Formats;
 
-namespace PWSandbox;
+namespace PWSandbox.Gui;
 
 internal sealed partial class MenuForm : Form
 {
@@ -15,18 +16,23 @@ internal sealed partial class MenuForm : Form
 		ApplyLocalization();
 		Localization.LocalizationChanged += (_, _) => ApplyLocalization();
 
-		foreach (Language language in Localization.AvailableLanguages) languageComboBox.Items.Add(language);
-		languageComboBox.SelectedIndex = languageComboBox.Items.IndexOf(Localization.CurrentLanguage);
+		foreach (Language language in Localization.AvailableLanguages)
+			languageComboBox.Items.Add(language);
+
+		languageComboBox.SelectedIndex = languageComboBox.Items.IndexOf(
+			Localization.CurrentLanguage
+		);
 	}
 
 	private void LoadMap(object sender, EventArgs e)
 	{
-		if (openFileDialog.ShowDialog(this) != DialogResult.OK) return;
+		if (openFileDialog.ShowDialog(this) != DialogResult.OK)
+			return;
 
 		Map map;
 		try
 		{
-			map = MapParser.ParseMapFromFile(openFileDialog.FileName);
+			map = Map.ParseFromFile(openFileDialog.FileName);
 		}
 		catch (Exception exception) when (exception is FormatException or NotSupportedException)
 		{
@@ -42,7 +48,9 @@ internal sealed partial class MenuForm : Form
 				MessageBoxButtons.OK,
 				MessageBoxIcon.Error,
 				MessageBoxDefaultButton.Button1,
-				Localization.AreStringsRightToLeft ? MessageBoxOptions.RightAlign | MessageBoxOptions.RtlReading : 0
+				Localization.AreStringsRightToLeft
+					? MessageBoxOptions.RightAlign | MessageBoxOptions.RtlReading
+					: 0
 			);
 
 			return;
@@ -53,9 +61,11 @@ internal sealed partial class MenuForm : Form
 
 	private void OpenAboutAppDialog(object sender, EventArgs e) => new AboutForm().ShowDialog(this);
 
-	private void OpenUpdaterDialog(object sender, EventArgs e) => new UpdateCheckForm().ShowDialog(this);
+	private void OpenUpdaterDialog(object sender, EventArgs e) =>
+		new UpdateCheckForm().ShowDialog(this);
 
-	private void ChangeLanguage(object sender, EventArgs e) => Localization.SetCurrentLanguage(((Language)languageComboBox.SelectedItem!).LanguageId);
+	private void ChangeLanguage(object sender, EventArgs e) =>
+		Localization.SetCurrentLanguage(((Language)languageComboBox.SelectedItem!).Id);
 
 	private void ApplyLocalization()
 	{

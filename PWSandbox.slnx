@@ -1,12 +1,22 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="dotnet-tools.json" />
+    <File Path="global.json" />
+    <File Path="LICENSE.txt" />
+    <File Path="README.md" />
+  </Folder>
 
-  <Configurations>
-    <Platform Name="Any CPU" />
-    <Platform Name="arm64" />
-    <Platform Name="x64" />
-    <Platform Name="x86" />
-  </Configurations>
+  <Folder Name="/Map Examples/">
+    <File Path="map_examples/labyrinth.pws_map" />
+    <File Path="map_examples/logo.pws_map" />
+    <File Path="map_examples/v1_1-map-format-test.pws_map" />
+  </Folder>
 
-  <Project Path="src/PWSandbox.csproj" />
+  <Project Path="src/Formats/PWSandbox.Formats.csproj" />
 
+  <Project Path="src/Gui/PWSandbox.Gui.csproj" />
 </Solution>
